@@ -348,16 +348,25 @@ function renderStats() {
   const stats = [
     { value: state.bikes.length, caption: "Bikes tracked" },
     { value: wheelsetCount(), caption: "Wheelsets tracked" },
-    { value: formatDistance(totalDistance()), caption: "Bike distance" },
+    { value: totalDistance(), caption: "Bike distance", type: "distance" },
     { value: allDueItems().filter((item) => item.status !== "In range").length, caption: "Items due soon" }
   ];
   elements.statsGrid.innerHTML = "";
   stats.forEach((stat) => {
     const article = document.createElement("article");
     article.className = "stat-card";
-    article.innerHTML = `<strong>${stat.value}</strong><p class="stat-caption">${stat.caption}</p>`;
+    article.innerHTML = `
+      <strong class="stat-value">${renderStatValue(stat)}</strong>
+      <p class="stat-caption">${stat.caption}</p>
+    `;
     elements.statsGrid.appendChild(article);
   });
+}
+
+function renderStatValue(stat) {
+  if (stat.type !== "distance") return `${stat.value}`;
+  const [amount, unit] = formatDistance(stat.value).split(" ");
+  return `${amount}<span class="stat-unit">${unit}</span>`;
 }
 
 function renderPriority() {

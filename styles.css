@@ -1,24 +1,19 @@
 :root {
-  --bg: #f3efe7;
-  --bg-warm: #f8f2e8;
-  --panel: rgba(255, 252, 246, 0.88);
-  --panel-strong: #fffaf2;
-  --panel-ink: #211a15;
-  --text: #1c1713;
-  --muted: #6e655b;
-  --line: rgba(28, 23, 19, 0.1);
-  --line-strong: rgba(28, 23, 19, 0.16);
-  --accent: #dd6a1f;
-  --accent-deep: #bc4e12;
-  --teal: #1d6d74;
-  --teal-soft: rgba(29, 109, 116, 0.1);
-  --peach-soft: rgba(221, 106, 31, 0.1);
-  --rose-soft: rgba(199, 54, 108, 0.12);
-  --sun-soft: rgba(242, 176, 30, 0.14);
-  --ok: #2b8a57;
-  --warn: #b67600;
-  --bad: #c7366c;
-  --shadow: 0 24px 80px rgba(76, 57, 31, 0.12);
+  --bg: #f5f3ef;
+  --panel: rgba(255, 255, 255, 0.9);
+  --panel-strong: #ffffff;
+  --panel-ink: #181512;
+  --text: #181512;
+  --muted: #6a6258;
+  --line: rgba(24, 21, 18, 0.08);
+  --line-strong: rgba(24, 21, 18, 0.14);
+  --accent: #d7661f;
+  --accent-deep: #b75217;
+  --teal: #1b5d62;
+  --ok: #248158;
+  --warn: #b07400;
+  --bad: #c03567;
+  --shadow: 0 18px 44px rgba(39, 28, 17, 0.08);
 }
 
 * {
@@ -35,9 +30,8 @@ body {
   font-family: "DM Sans", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(221, 106, 31, 0.18), transparent 28%),
-    radial-gradient(circle at 84% 12%, rgba(29, 109, 116, 0.14), transparent 22%),
-    linear-gradient(180deg, #f7f2ea 0%, #f0e7d8 100%);
+    radial-gradient(circle at top left, rgba(215, 102, 31, 0.08), transparent 24%),
+    linear-gradient(180deg, #f8f6f2 0%, #f2eee8 100%);
 }
 
 button,
@@ -50,6 +44,14 @@ textarea {
 button {
   -webkit-appearance: none;
   appearance: none;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(27, 93, 98, 0.14);
 }
 
 .app-shell {
@@ -100,7 +102,7 @@ button {
 .panel,
 .strava-card {
   border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.58);
   box-shadow: var(--shadow);
   backdrop-filter: blur(16px);
 }
@@ -111,25 +113,21 @@ button {
 }
 
 .utility-panel {
-  background:
-    linear-gradient(180deg, rgba(255, 250, 242, 0.98), rgba(255, 247, 238, 0.92));
+  background: rgba(255, 255, 255, 0.88);
 }
 
 .dashboard-panel {
-  background:
-    linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(252, 246, 236, 0.94));
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .garage-panel {
-  background:
-    linear-gradient(180deg, rgba(255, 252, 247, 0.94), rgba(255, 248, 239, 0.9));
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .hero-panel {
   grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.88fr);
   margin-bottom: 22px;
-  background:
-    linear-gradient(135deg, rgba(255, 252, 246, 0.98), rgba(255, 247, 236, 0.92));
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .onboarding-copy {
@@ -143,7 +141,7 @@ button {
 .subsection-title {
   margin: 0;
   color: var(--teal);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -232,13 +230,13 @@ label,
 
 .primary-button {
   color: white;
-  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-  box-shadow: 0 10px 24px rgba(188, 78, 18, 0.22);
+  background: var(--panel-ink);
+  box-shadow: none;
 }
 
 .ghost-button {
   color: var(--panel-ink);
-  background: rgba(255, 251, 246, 0.86);
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--line);
 }
 
@@ -268,7 +266,6 @@ label,
 .strava-card {
   padding: 28px;
   background:
-    radial-gradient(circle at top left, rgba(255, 123, 0, 0.14), transparent 34%),
     linear-gradient(160deg, rgba(25, 22, 19, 0.96), rgba(14, 13, 12, 0.98));
   color: white;
 }
@@ -380,7 +377,7 @@ label,
 .segment.is-active {
   color: var(--panel-ink);
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 6px 18px rgba(57, 40, 24, 0.1);
+  box-shadow: 0 2px 10px rgba(57, 40, 24, 0.08);
 }
 
 .topbar .segment.is-active {
@@ -420,39 +417,38 @@ label,
 .stat-card {
   display: grid;
   gap: 8px;
-  min-height: 138px;
-  padding: 20px;
+  min-height: 128px;
+  padding: 18px;
   align-content: start;
-}
-
-.stat-card:nth-child(1) {
-  background: linear-gradient(180deg, #fff8ef, #fff6ea);
-}
-
-.stat-card:nth-child(2) {
-  background: linear-gradient(180deg, #f4fbfb, #eef8f8);
-}
-
-.stat-card:nth-child(3) {
-  background: linear-gradient(180deg, #fff9f2, #fff3e4);
-}
-
-.stat-card:nth-child(4) {
-  background: linear-gradient(180deg, #fef6f8, #fff1f5);
+  background: #fff;
 }
 
 .stat-card strong {
   display: block;
-  font-size: clamp(1.9rem, 2.2vw, 2.6rem);
-  line-height: 0.95;
+  font-size: clamp(1.8rem, 2.1vw, 2.4rem);
+  line-height: 0.9;
   letter-spacing: -0.05em;
+}
+
+.stat-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.stat-unit {
+  font-size: 0.56em;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0;
 }
 
 .stat-caption {
   margin: 0;
-  max-width: 10ch;
-  font-size: 1rem;
-  line-height: 1.15;
+  max-width: 11ch;
+  font-size: 0.96rem;
+  line-height: 1.2;
 }
 
 .priority-grid {
@@ -462,21 +458,14 @@ label,
 
 .priority-card {
   padding: 18px;
-}
-
-.priority-card:first-child {
-  background: linear-gradient(180deg, rgba(255, 245, 240, 0.98), rgba(255, 250, 246, 0.94));
-}
-
-.priority-card:last-child {
-  background: linear-gradient(180deg, rgba(241, 249, 249, 0.98), rgba(248, 252, 252, 0.94));
+  background: #fff;
 }
 
 .priority-item {
   display: grid;
   gap: 6px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.72);
+  background: #fff;
 }
 
 .priority-item.is-due-now {
@@ -495,29 +484,25 @@ label,
 }
 
 .garage-tabs .segment {
-  background: rgba(255, 251, 246, 0.8);
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(28, 23, 19, 0.08);
 }
 
 .garage-tabs .segment.is-active {
   color: white;
-  background: linear-gradient(135deg, var(--teal), #24464a);
+  background: var(--panel-ink);
   border-color: transparent;
 }
 
 .bike-card,
 .wheelset-card {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   padding: 18px;
 }
 
 .bike-card {
-  background: rgba(255, 251, 246, 0.88);
-}
-
-.bike-meter-stack .meter-card {
-  background: linear-gradient(180deg, rgba(241, 249, 249, 0.8), rgba(255, 255, 255, 0.74));
+  background: #fff;
 }
 
 .bike-name {
@@ -529,16 +514,17 @@ label,
 }
 
 .wheelset-card {
-  background: linear-gradient(180deg, rgba(255, 247, 235, 0.94), rgba(255, 250, 242, 0.92));
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 18px;
 }
 
 .wheelset-block {
   display: grid;
   gap: 14px;
-  padding: 16px;
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(255, 244, 230, 0.84), rgba(255, 249, 242, 0.9));
-  border: 1px solid rgba(221, 106, 31, 0.1);
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .wheelset-title-row {
@@ -563,16 +549,16 @@ label,
 }
 
 .status-badge.is-active {
-  background: rgba(29, 109, 116, 0.12);
-  color: var(--teal);
+  background: rgba(24, 21, 18, 0.08);
+  color: var(--panel-ink);
 }
 
 .wheelset-specs {
   display: grid;
   gap: 6px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.72);
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .wheelset-specs p,
@@ -599,13 +585,20 @@ label,
   font-weight: 700;
 }
 
-.wheelset-meter-stack .meter-card {
-  background: linear-gradient(180deg, rgba(255, 251, 246, 0.92), rgba(255, 255, 255, 0.76));
+.meter-card {
+  padding: 14px 0 16px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
-.meter-card {
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.74);
+.meter-stack {
+  gap: 0;
+}
+
+.meter-stack .meter-card + .meter-card {
+  border-top: 1px solid var(--line);
 }
 
 .meter-copy {
@@ -651,8 +644,27 @@ label,
   margin-bottom: 8px;
 }
 
+.quick-action-button {
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: 0.94rem;
+}
+
 .stack-form {
   gap: 16px;
+}
+
+.dense-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
+.dense-form .primary-button,
+.dense-form .ghost-button,
+.dense-form .file-button,
+.dense-form label:has(textarea),
+.dense-form label:last-of-type {
+  grid-column: 1 / -1;
 }
 
 .stack-form label {
@@ -666,13 +678,13 @@ label,
 .stack-form select,
 .stack-form textarea {
   width: 100%;
-  min-height: 52px;
-  padding: 14px 16px;
+  min-height: 50px;
+  padding: 13px 15px;
   border-radius: 18px;
   border: 1px solid rgba(28, 23, 19, 0.1);
-  background: rgba(255, 255, 255, 0.9);
+  background: #fff;
   color: var(--panel-ink);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: none;
 }
 
 .stack-form textarea {
@@ -697,7 +709,7 @@ label,
 
 .activity-item {
   padding: 18px;
-  background: linear-gradient(180deg, rgba(255, 251, 246, 0.94), rgba(255, 247, 238, 0.92));
+  background: #fff;
 }
 
 .activity-title {
@@ -765,6 +777,10 @@ label,
   .stats-grid,
   .priority-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .dense-form {
+    grid-template-columns: 1fr;
   }
 }
 

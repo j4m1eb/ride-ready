@@ -553,6 +553,18 @@ function editBike(bikeId) {
   bike.name = name.trim();
   bike.category = category.trim();
   bike.distance = Number(distance) || bike.distance;
+
+  BIKE_CONSUMABLES.forEach((item) => {
+    const interval = prompt(`${item.label} target (${state.units})`, String(bike.thresholds[item.key]));
+    if (interval !== null && interval !== "") {
+      bike.thresholds[item.key] = Number(interval) || bike.thresholds[item.key];
+    }
+    const baselineDate = prompt(`${item.label} install/service date (YYYY-MM-DD)`, bike.maintenance[item.key].date);
+    if (baselineDate !== null && baselineDate.trim()) {
+      bike.maintenance[item.key].date = baselineDate.trim();
+    }
+  });
+
   reconcileBikeMaintenance(bike);
   persist();
   render();
@@ -575,6 +587,19 @@ function editWheelset(bikeId, wheelsetId) {
   if (rearTyre !== null) wheelset.components.rearTyre = rearTyre.trim();
   if (frontSealant !== null) wheelset.components.frontSealant = frontSealant.trim();
   if (rearSealant !== null) wheelset.components.rearSealant = rearSealant.trim();
+
+  WHEELSET_CONSUMABLES.forEach((item) => {
+    const unitsLabel = item.mode === "time" ? "months" : state.units;
+    const interval = prompt(`${item.label} target (${unitsLabel})`, String(wheelset.thresholds[item.key]));
+    if (interval !== null && interval !== "") {
+      wheelset.thresholds[item.key] = Number(interval) || wheelset.thresholds[item.key];
+    }
+    const baselineDate = prompt(`${item.label} install/refresh date (YYYY-MM-DD)`, wheelset.maintenance[item.key].date);
+    if (baselineDate !== null && baselineDate.trim()) {
+      wheelset.maintenance[item.key].date = baselineDate.trim();
+    }
+  });
+
   persist();
   render();
 }
@@ -628,13 +653,13 @@ function currentProgress(item, currentDistance, maintenance, interval) {
     const months = monthsSince(maintenance.date);
     return {
       ratio: months / interval,
-      detail: `${formatMonths(months)} since refresh • target ${formatMonths(interval)}`
+      detail: `${formatMonths(months)} since refresh • target ${formatMonths(interval)} • date ${maintenance.date}`
     };
   }
   const distance = Math.max(0, currentDistance - maintenance.distanceAtService);
   return {
     ratio: distance / interval,
-    detail: `${formatDistance(distance)} since service • target ${formatDistance(interval)}`
+    detail: `${formatDistance(distance)} since service • target ${formatDistance(interval)} • date ${maintenance.date}`
   };
 }
 

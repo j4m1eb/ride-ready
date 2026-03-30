@@ -79,7 +79,7 @@ h1,
 h2,
 h3 {
   margin: 0;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Manrope", sans-serif;
   line-height: 0.95;
 }
 
@@ -257,7 +257,7 @@ label,
 
 .stat-card strong {
   display: block;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Manrope", sans-serif;
   font-size: 2rem;
 }
 

@@ -61,8 +61,7 @@ textarea:focus-visible {
 
 .topbar,
 .onboarding,
-.layout,
-.dashboard-shell {
+.layout {
   display: grid;
   gap: 22px;
 }
@@ -337,7 +336,7 @@ label,
 }
 
 .layout {
-  grid-template-columns: minmax(0, 1.62fr) minmax(340px, 0.88fr);
+  grid-template-columns: minmax(0, 1.85fr) minmax(360px, 0.72fr);
   align-items: start;
 }
 
@@ -345,11 +344,6 @@ label,
 .sidebar {
   display: grid;
   gap: 22px;
-}
-
-.dashboard-shell {
-  grid-template-columns: minmax(0, 1.48fr) minmax(320px, 0.72fr);
-  align-items: start;
 }
 
 .service-panel {
@@ -763,7 +757,6 @@ label,
 
 @media (max-width: 1220px) {
   .layout,
-  .dashboard-shell,
   .hero-panel {
     grid-template-columns: 1fr;
   }

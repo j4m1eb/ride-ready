@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chainkeeper</title>
+  <title>Ride Ready</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -11,68 +11,94 @@
 </head>
 <body>
   <div class="app-shell">
-    <header class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">Bike maintenance, not just ride logging</p>
-        <h1>Track every bike consumable from chain wax to front and rear tyres.</h1>
-        <p class="hero-text">
-          Local-first maintenance tracking with per-bike mileage, service history, consumable lifecycles, and a Strava-ready sync model.
-        </p>
-        <div class="hero-actions">
-          <button class="primary-button" id="seed-demo">Load Demo Data</button>
-          <button class="ghost-button" id="export-data">Export JSON</button>
-          <label class="ghost-button file-button">
-            Import JSON
-            <input type="file" id="import-data" accept="application/json">
-          </label>
-        </div>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Bike care tracker</p>
+        <h1>Ride Ready</h1>
       </div>
-      <section class="strava-card">
-        <div class="strava-head">
-          <span class="status-dot"></span>
-          <p>Strava integration path</p>
+      <div class="topbar-actions">
+        <div class="segmented-control" role="tablist" aria-label="Units">
+          <button class="segment is-active" data-units="km" type="button">KM</button>
+          <button class="segment" data-units="mi" type="button">MI</button>
         </div>
-        <h2>Ready for OAuth and ride sync</h2>
-        <p>
-          This prototype stores local bike and maintenance data today. The next backend step is syncing activities by
-          `gear_id` and recalculating service intervals from imported distance totals.
-        </p>
-        <button class="strava-button" id="connect-strava" type="button">Connect to Strava</button>
-        <p class="inline-note">This button is a product stub in the prototype.</p>
-      </section>
+        <button class="ghost-button" id="export-data" type="button">Export</button>
+        <label class="ghost-button file-button">
+          Import
+          <input type="file" id="import-data" accept="application/json">
+        </label>
+      </div>
     </header>
 
-    <main class="layout">
-      <section class="panel overview-panel">
-        <div class="panel-header">
-          <div>
-            <p class="eyebrow">Overview</p>
-            <h2>Maintenance status</h2>
-          </div>
-          <div class="segmented-control" role="tablist" aria-label="Units">
-            <button class="segment is-active" data-units="km" type="button">KM</button>
-            <button class="segment" data-units="mi" type="button">MI</button>
-          </div>
+    <section class="onboarding panel" id="onboarding-section">
+      <div class="onboarding-copy">
+        <p class="eyebrow">Onboarding</p>
+        <h2>Start with Strava, then layer maintenance on top.</h2>
+        <p class="hero-text">
+          The right product flow is bike import first, wheelsets second, consumables third. This static build stubs the
+          Strava step with sample bike import so the flow is usable now.
+        </p>
+        <div class="hero-actions">
+          <button class="primary-button" id="connect-strava" type="button">Connect Strava</button>
+          <button class="ghost-button" id="show-manual-setup" type="button">Skip Strava for now</button>
+          <button class="ghost-button" id="seed-demo" type="button">Load demo account</button>
         </div>
-        <div class="stats-grid" id="stats-grid"></div>
-        <div class="bike-list" id="bike-list"></div>
-      </section>
+      </div>
+      <div class="strava-card">
+        <div class="strava-head">
+          <span class="status-dot"></span>
+          <p id="strava-status">Strava not connected</p>
+        </div>
+        <h3>Imported bikes</h3>
+        <p class="inline-note">Select which bikes to track. Real OAuth and ride sync are the next backend step.</p>
+        <div class="imported-bike-list" id="imported-bike-list"></div>
+        <button class="strava-button" id="import-selected-bikes" type="button">Import selected bikes</button>
+      </div>
+    </section>
 
-      <aside class="sidebar">
+    <main class="layout">
+      <section class="content-column">
         <section class="panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Add bike</p>
-              <h2>Bike profile</h2>
+              <p class="eyebrow">Today</p>
+              <h2>Maintenance dashboard</h2>
+            </div>
+          </div>
+          <div class="stats-grid" id="stats-grid"></div>
+          <div class="priority-grid">
+            <article class="priority-card">
+              <p class="subsection-title">Needs attention</p>
+              <div id="priority-list"></div>
+            </article>
+            <article class="priority-card">
+              <p class="subsection-title">Active setups</p>
+              <div id="active-setups"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Garage</p>
+              <h2>Your bikes</h2>
+            </div>
+          </div>
+          <div class="bike-list" id="bike-list"></div>
+        </section>
+      </section>
+
+      <aside class="sidebar">
+        <section class="panel" id="manual-setup-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Manage</p>
+              <h2>Add bike</h2>
             </div>
           </div>
           <form id="bike-form" class="stack-form">
-            <label>
-              Bike name
-              <input name="name" type="text" placeholder="Dogma Road" required>
-            </label>
-            <label>
-              Category
+            <label>Bike name<input name="name" type="text" placeholder="Dogma Road" required></label>
+            <label>Category
               <select name="category">
                 <option>Road</option>
                 <option>Gravel</option>
@@ -81,74 +107,23 @@
                 <option>Trainer</option>
               </select>
             </label>
-            <label>
-              Current distance
-              <input name="distance" type="number" min="0" step="1" value="0" required>
-            </label>
-            <label>
-              Default wheelset
-              <input name="wheelsetName" type="text" placeholder="50mm race wheels" required>
-            </label>
-            <label>
-              Wheel notes
-              <input name="wheelsetNotes" type="text" placeholder="DT Swiss ARC 1400, GP5000 S TR">
-            </label>
-            <label>
-              Wheelset distance
-              <input name="wheelsetDistance" type="number" min="0" step="1" value="0" required>
-            </label>
-            <label>
-              Front tyre
-              <input name="frontTyreName" type="text" placeholder="Continental GP5000 S TR 30 mm">
-            </label>
-            <label>
-              Rear tyre
-              <input name="rearTyreName" type="text" placeholder="Continental GP5000 S TR 30 mm">
-            </label>
-            <label>
-              Front sealant
-              <input name="frontSealantName" type="text" placeholder="Silca Ultimate Tubeless">
-            </label>
-            <label>
-              Rear sealant
-              <input name="rearSealantName" type="text" placeholder="Silca Ultimate Tubeless">
-            </label>
-            <label>
-              Chain wax interval
-              <input name="waxInterval" type="number" min="1" step="1" value="300" required>
-            </label>
-            <label>
-              Front tyre service life
-              <input name="frontTyreInterval" type="number" min="1" step="1" value="2500" required>
-            </label>
-            <label>
-              Rear tyre service life
-              <input name="rearTyreInterval" type="number" min="1" step="1" value="2200" required>
-            </label>
-            <label>
-              Front sealant refresh interval (months)
-              <input name="frontSealantInterval" type="number" min="1" step="1" value="4" required>
-            </label>
-            <label>
-              Rear sealant refresh interval (months)
-              <input name="rearSealantInterval" type="number" min="1" step="1" value="4" required>
-            </label>
-            <label>
-              Chainring service life
-              <input name="chainringInterval" type="number" min="1" step="1" value="12000" required>
-            </label>
-            <label>
-              Cassette service life
-              <input name="cassetteInterval" type="number" min="1" step="1" value="8000" required>
-            </label>
-            <label>
-              Front brake pad service life
-              <input name="frontBrakePadsInterval" type="number" min="1" step="1" value="2500" required>
-            </label>
-            <label>
-              Rear brake pad service life
-              <input name="rearBrakePadsInterval" type="number" min="1" step="1" value="2200" required>
-            </label>
+            <label>Current distance<input name="distance" type="number" min="0" step="1" value="0" required></label>
+            <label>Default wheelset<input name="wheelsetName" type="text" placeholder="50mm race wheels" required></label>
+            <label>Wheel notes<input name="wheelsetNotes" type="text" placeholder="DT Swiss ARC 1400, GP5000 S TR"></label>
+            <label>Wheelset distance<input name="wheelsetDistance" type="number" min="0" step="1" value="0" required></label>
+            <label>Front tyre<input name="frontTyreName" type="text" placeholder="Continental GP5000 S TR 30 mm"></label>
+            <label>Rear tyre<input name="rearTyreName" type="text" placeholder="Continental GP5000 S TR 30 mm"></label>
+            <label>Front sealant<input name="frontSealantName" type="text" placeholder="Silca Ultimate Tubeless"></label>
+            <label>Rear sealant<input name="rearSealantName" type="text" placeholder="Silca Ultimate Tubeless"></label>
+            <label>Chain wax interval<input name="waxInterval" type="number" min="1" step="1" value="300" required></label>
+            <label>Front tyre life<input name="frontTyreInterval" type="number" min="1" step="1" value="2500" required></label>
+            <label>Rear tyre life<input name="rearTyreInterval" type="number" min="1" step="1" value="2200" required></label>
+            <label>Front sealant interval (months)<input name="frontSealantInterval" type="number" min="1" step="1" value="4" required></label>
+            <label>Rear sealant interval (months)<input name="rearSealantInterval" type="number" min="1" step="1" value="4" required></label>
+            <label>Chainring life<input name="chainringInterval" type="number" min="1" step="1" value="12000" required></label>
+            <label>Cassette life<input name="cassetteInterval" type="number" min="1" step="1" value="8000" required></label>
+            <label>Front pad life<input name="frontBrakePadsInterval" type="number" min="1" step="1" value="2500" required></label>
+            <label>Rear pad life<input name="rearBrakePadsInterval" type="number" min="1" step="1" value="2200" required></label>
             <button class="primary-button" type="submit">Save bike</button>
           </form>
         </section>
@@ -156,59 +131,23 @@
         <section class="panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Add wheelset</p>
-              <h2>Wheel profile</h2>
+              <p class="eyebrow">Manage</p>
+              <h2>Add wheelset</h2>
             </div>
           </div>
           <form id="wheelset-form" class="stack-form">
-            <label>
-              Bike
-              <select name="bikeId" id="wheelset-bike-select" required></select>
-            </label>
-            <label>
-              Wheelset name
-              <input name="name" type="text" placeholder="65mm deep wheels" required>
-            </label>
-            <label>
-              Notes
-              <input name="notes" type="text" placeholder="Race day setup, 28 mm tyres">
-            </label>
-            <label>
-              Current wheelset distance
-              <input name="distance" type="number" min="0" step="1" value="0" required>
-            </label>
-            <label>
-              Front tyre
-              <input name="frontTyreName" type="text" placeholder="Schwalbe Pro One front">
-            </label>
-            <label>
-              Rear tyre
-              <input name="rearTyreName" type="text" placeholder="Schwalbe Pro One rear">
-            </label>
-            <label>
-              Front sealant
-              <input name="frontSealantName" type="text" placeholder="Orange Seal Endurance">
-            </label>
-            <label>
-              Rear sealant
-              <input name="rearSealantName" type="text" placeholder="Orange Seal Endurance">
-            </label>
-            <label>
-              Front tyre service life
-              <input name="frontTyreInterval" type="number" min="1" step="1" value="2500" required>
-            </label>
-            <label>
-              Rear tyre service life
-              <input name="rearTyreInterval" type="number" min="1" step="1" value="2200" required>
-            </label>
-            <label>
-              Front sealant refresh interval (months)
-              <input name="frontSealantInterval" type="number" min="1" step="1" value="4" required>
-            </label>
-            <label>
-              Rear sealant refresh interval (months)
-              <input name="rearSealantInterval" type="number" min="1" step="1" value="4" required>
-            </label>
+            <label>Bike<select name="bikeId" id="wheelset-bike-select" required></select></label>
+            <label>Wheelset name<input name="name" type="text" placeholder="65mm deep wheels" required></label>
+            <label>Notes<input name="notes" type="text" placeholder="Race day setup, 28 mm tyres"></label>
+            <label>Current distance<input name="distance" type="number" min="0" step="1" value="0" required></label>
+            <label>Front tyre<input name="frontTyreName" type="text" placeholder="Schwalbe Pro One front"></label>
+            <label>Rear tyre<input name="rearTyreName" type="text" placeholder="Schwalbe Pro One rear"></label>
+            <label>Front sealant<input name="frontSealantName" type="text" placeholder="Orange Seal Endurance"></label>
+            <label>Rear sealant<input name="rearSealantName" type="text" placeholder="Orange Seal Endurance"></label>
+            <label>Front tyre life<input name="frontTyreInterval" type="number" min="1" step="1" value="2500" required></label>
+            <label>Rear tyre life<input name="rearTyreInterval" type="number" min="1" step="1" value="2200" required></label>
+            <label>Front sealant interval (months)<input name="frontSealantInterval" type="number" min="1" step="1" value="4" required></label>
+            <label>Rear sealant interval (months)<input name="rearSealantInterval" type="number" min="1" step="1" value="4" required></label>
             <button class="primary-button" type="submit">Save wheelset</button>
           </form>
         </section>
@@ -216,17 +155,13 @@
         <section class="panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Quick actions</p>
-              <h2>Log work</h2>
+              <p class="eyebrow">Manage</p>
+              <h2>Log service</h2>
             </div>
           </div>
           <form id="service-form" class="stack-form">
-            <label>
-              Bike
-              <select name="bikeId" id="service-bike-select" required></select>
-            </label>
-            <label>
-              Action
+            <label>Bike<select name="bikeId" id="service-bike-select" required></select></label>
+            <label>Action
               <select name="type" id="service-type-select">
                 <option value="wax">Waxed chain</option>
                 <option value="chainring">Replaced chainrings</option>
@@ -240,18 +175,9 @@
                 <option value="ride">Added ride distance</option>
               </select>
             </label>
-            <label id="service-wheelset-label">
-              Wheelset
-              <select name="wheelsetId" id="service-wheelset-select"></select>
-            </label>
-            <label>
-              Distance
-              <input name="distance" type="number" min="0" step="1" value="0" required>
-            </label>
-            <label>
-              Notes
-              <textarea name="notes" rows="3" placeholder="Silca hot wax, GP5000 rear replaced, Orange Seal top-up..."></textarea>
-            </label>
+            <label id="service-wheelset-label">Wheelset<select name="wheelsetId" id="service-wheelset-select"></select></label>
+            <label>Distance<input name="distance" type="number" min="0" step="1" value="0" required></label>
+            <label>Notes<textarea name="notes" rows="3" placeholder="Silca hot wax, rear tyre replaced, sealant top-up..."></textarea></label>
             <button class="primary-button" type="submit">Save event</button>
           </form>
         </section>
@@ -259,7 +185,7 @@
         <section class="panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Recent activity</p>
+              <p class="eyebrow">History</p>
               <h2>Service log</h2>
             </div>
           </div>
@@ -276,9 +202,11 @@
           <h3 class="bike-name"></h3>
           <p class="bike-meta"></p>
         </div>
-        <button class="danger-link delete-bike" type="button">Delete</button>
+        <div class="inline-actions">
+          <button class="ghost-button edit-bike" type="button">Edit</button>
+          <button class="danger-link delete-bike" type="button">Delete</button>
+        </div>
       </div>
-      <p class="subsection-title">Bike-level consumables</p>
       <div class="meter-stack bike-meter-stack"></div>
       <div class="wheelset-block">
         <div class="wheelset-header">
@@ -287,6 +215,24 @@
         <div class="wheelset-list"></div>
       </div>
     </article>
+  </template>
+
+  <template id="wheelset-template">
+    <section class="wheelset-card">
+      <div class="wheelset-top">
+        <div>
+          <h4 class="wheelset-name"></h4>
+          <p class="wheelset-meta"></p>
+        </div>
+        <div class="inline-actions">
+          <button class="ghost-button activate-wheelset" type="button">Set active</button>
+          <button class="ghost-button edit-wheelset" type="button">Edit</button>
+          <button class="danger-link delete-wheelset" type="button">Delete</button>
+        </div>
+      </div>
+      <div class="wheelset-specs"></div>
+      <div class="meter-stack wheelset-meter-stack"></div>
+    </section>
   </template>
 
   <template id="meter-template">
@@ -298,24 +244,18 @@
         </div>
         <p class="meter-state"></p>
       </div>
-      <div class="meter-bar">
-        <div class="meter-fill"></div>
-      </div>
+      <div class="meter-bar"><div class="meter-fill"></div></div>
     </div>
   </template>
 
-  <template id="wheelset-template">
-    <section class="wheelset-card">
-      <div class="wheelset-top">
-        <div>
-          <h4 class="wheelset-name"></h4>
-          <p class="wheelset-meta"></p>
-        </div>
-        <button class="ghost-button activate-wheelset" type="button">Set active</button>
+  <template id="imported-bike-template">
+    <label class="imported-bike">
+      <input type="checkbox" class="imported-bike-checkbox">
+      <div>
+        <p class="imported-bike-name"></p>
+        <p class="imported-bike-meta"></p>
       </div>
-      <div class="wheelset-specs"></div>
-      <div class="meter-stack wheelset-meter-stack"></div>
-    </section>
+    </label>
   </template>
 
   <script src="./app.js"></script>

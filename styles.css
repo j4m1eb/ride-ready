@@ -36,37 +36,66 @@ textarea {
 }
 
 .app-shell {
-  width: min(1280px, calc(100% - 32px));
-  margin: 24px auto 48px;
+  width: min(1320px, calc(100% - 28px));
+  margin: 20px auto 40px;
 }
 
-.hero,
+.topbar,
+.onboarding,
 .layout {
   display: grid;
   gap: 20px;
 }
 
-.hero {
-  grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1fr);
-  align-items: stretch;
+.topbar {
+  grid-template-columns: 1fr auto;
+  align-items: center;
   margin-bottom: 20px;
 }
 
-.hero-copy,
+.topbar-actions,
+.hero-actions,
+.panel-header,
+.bike-card-top,
+.wheelset-top,
+.meter-copy,
+.inline-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.topbar-actions,
+.hero-actions,
+.inline-actions {
+  flex-wrap: wrap;
+}
+
 .panel,
 .strava-card {
   background: var(--panel);
-  backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 28px;
+  border-radius: 26px;
   box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
 }
 
-.hero-copy {
-  padding: 36px;
+.panel {
+  padding: 22px;
 }
 
-.eyebrow {
+.onboarding {
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
+  margin-bottom: 20px;
+}
+
+.onboarding-copy {
+  padding: 10px 4px 0;
+}
+
+.eyebrow,
+.subsection-title {
   margin: 0 0 10px;
   color: var(--accent-2);
   font-size: 0.8rem;
@@ -77,59 +106,65 @@ textarea {
 
 h1,
 h2,
-h3 {
+h3,
+h4,
+.stat-card strong {
   margin: 0;
   font-family: "Manrope", sans-serif;
-  line-height: 0.95;
 }
 
 h1 {
-  max-width: 12ch;
-  font-size: clamp(2.8rem, 5vw, 5.2rem);
+  font-size: clamp(2rem, 3vw, 3rem);
+}
+
+h2 {
+  font-size: clamp(1.7rem, 2vw, 2.4rem);
+  line-height: 1;
+}
+
+h3 {
+  font-size: 1.6rem;
+  line-height: 1.05;
+}
+
+h4 {
+  font-size: 1.08rem;
 }
 
 .hero-text,
-.strava-card p,
 .inline-note,
 .bike-meta,
-.meter-detail,
+.wheelset-meta,
 .stat-caption,
 label,
-.activity-meta {
+.activity-meta,
+.empty-state,
+.priority-copy,
+.imported-bike-meta,
+.wheelset-specs {
   color: var(--muted);
 }
 
-.hero-text {
-  max-width: 54ch;
-  margin: 20px 0 0;
-  font-size: 1.05rem;
-  line-height: 1.5;
+.hero-text,
+.strava-card p {
+  line-height: 1.55;
 }
 
-.hero-actions,
-.panel-header,
-.strava-head,
-.bike-card-top,
-.meter-copy {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.hero-actions {
-  margin-top: 24px;
-  flex-wrap: wrap;
+.primary-button,
+.ghost-button,
+.strava-button,
+.segment,
+.danger-link {
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 150ms ease, opacity 150ms ease, background 150ms ease;
 }
 
 .primary-button,
 .ghost-button,
 .strava-button {
-  border: 0;
-  border-radius: 999px;
   padding: 12px 18px;
-  cursor: pointer;
-  transition: transform 150ms ease, opacity 150ms ease, background 150ms ease;
 }
 
 .primary-button:hover,
@@ -146,12 +181,14 @@ label,
 }
 
 .ghost-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   color: var(--ink);
   background: rgba(255, 250, 242, 0.8);
   border: 1px solid var(--line);
+}
+
+.danger-link {
+  background: transparent;
+  color: var(--bad);
 }
 
 .file-button {
@@ -167,7 +204,7 @@ label,
 }
 
 .strava-card {
-  padding: 28px;
+  padding: 26px;
   background:
     linear-gradient(160deg, rgba(22, 18, 15, 0.94), rgba(11, 11, 10, 0.98)),
     linear-gradient(135deg, rgba(217, 93, 57, 0.25), transparent 40%);
@@ -175,7 +212,8 @@ label,
 }
 
 .strava-head p,
-.strava-card .inline-note {
+.strava-card .inline-note,
+.strava-card .imported-bike-meta {
   color: rgba(255, 255, 255, 0.72);
 }
 
@@ -187,35 +225,58 @@ label,
   box-shadow: 0 0 0 6px rgba(255, 123, 0, 0.16);
 }
 
-.strava-card h2 {
-  margin-top: 18px;
-  font-size: 2rem;
+.imported-bike-list,
+.bike-list,
+.wheelset-list,
+.meter-stack,
+.activity-list,
+.stack-form,
+.priority-grid,
+#priority-list,
+#active-setups {
+  display: grid;
+  gap: 14px;
 }
 
-.strava-card p {
-  margin-top: 14px;
-  line-height: 1.5;
+.imported-bike {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.imported-bike-name {
+  margin: 0;
+  font-weight: 700;
+  color: white;
+}
+
+.imported-bike-meta,
+.wheelset-specs p,
+.activity-item p,
+.priority-item p {
+  margin: 0;
 }
 
 .strava-button {
-  margin-top: 20px;
+  margin-top: 16px;
   color: white;
   background: linear-gradient(135deg, #ff6b00, #ff8f1f);
 }
 
 .layout {
-  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.9fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(340px, 0.9fr);
   align-items: start;
 }
 
-.panel,
+.content-column,
 .sidebar {
   display: grid;
   gap: 20px;
-}
-
-.panel {
-  padding: 24px;
 }
 
 .segmented-control {
@@ -226,11 +287,8 @@ label,
 }
 
 .segment {
-  border: 0;
   background: transparent;
-  border-radius: 999px;
   padding: 8px 14px;
-  cursor: pointer;
 }
 
 .segment.is-active {
@@ -248,7 +306,9 @@ label,
 .stat-card,
 .bike-card,
 .meter-card,
-.activity-item {
+.activity-item,
+.priority-card,
+.priority-item {
   padding: 18px;
   border-radius: 22px;
   background: var(--panel-strong);
@@ -257,93 +317,46 @@ label,
 
 .stat-card strong {
   display: block;
-  font-family: "Manrope", sans-serif;
   font-size: 2rem;
 }
 
-.stat-caption {
-  margin-top: 4px;
+.priority-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 16px;
 }
 
-.bike-list,
-.meter-stack,
-.activity-list,
-.stack-form {
+.priority-item {
+  display: grid;
+  gap: 6px;
+}
+
+.priority-title {
+  font-weight: 700;
+}
+
+.bike-card,
+.wheelset-card {
   display: grid;
   gap: 14px;
-}
-
-.subsection-title {
-  margin: 6px 0 0;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.bike-card {
-  margin-top: 18px;
 }
 
 .bike-name {
   font-size: 1.5rem;
 }
 
-.danger-link {
-  border: 0;
-  background: transparent;
-  color: var(--bad);
-  cursor: pointer;
-}
-
-.meter-card {
-  padding: 14px;
-}
-
-.wheelset-block {
-  display: grid;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.wheelset-list {
-  display: grid;
-  gap: 12px;
-}
-
 .wheelset-card {
   padding: 16px;
   border-radius: 20px;
   background: rgba(255, 247, 235, 0.92);
-  border: 1px solid rgba(23, 20, 17, 0.08);
 }
 
 .wheelset-specs {
   display: grid;
-  gap: 4px;
-  margin: 14px 0 2px;
-  color: var(--muted);
+  gap: 5px;
 }
 
-.wheelset-specs p {
-  margin: 0;
-}
-
-.wheelset-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.wheelset-name {
-  font-size: 1.1rem;
-}
-
-.wheelset-meta {
-  margin: 6px 0 0;
-  color: var(--muted);
+.meter-card {
+  padding: 14px;
 }
 
 .meter-label,
@@ -369,7 +382,6 @@ label,
 .meter-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent-2), #7fc8c4);
 }
 
 .stack-form label {
@@ -388,21 +400,19 @@ label,
   background: white;
 }
 
-.activity-item {
-  display: grid;
-  gap: 4px;
-}
-
 .empty-state {
   padding: 20px;
   border-radius: 20px;
-  color: var(--muted);
   background: rgba(255, 250, 242, 0.65);
   border: 1px dashed rgba(23, 20, 17, 0.16);
 }
 
-@media (max-width: 1080px) {
-  .hero,
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 1100px) {
+  .onboarding,
   .layout {
     grid-template-columns: 1fr;
   }
@@ -410,30 +420,28 @@ label,
 
 @media (max-width: 760px) {
   .app-shell {
-    width: min(100% - 20px, 1280px);
-    margin-top: 10px;
+    width: min(100% - 16px, 1320px);
+    margin-top: 12px;
   }
 
-  .hero-copy,
   .panel,
   .strava-card {
-    padding: 20px;
-    border-radius: 24px;
+    padding: 18px;
+    border-radius: 22px;
   }
 
+  .topbar,
+  .priority-grid,
   .stats-grid {
     grid-template-columns: 1fr;
   }
 
-  h1 {
-    font-size: 2.6rem;
-  }
-
   .panel-header,
+  .topbar-actions,
   .hero-actions,
   .bike-card-top,
-  .meter-copy,
-  .wheelset-top {
+  .wheelset-top,
+  .meter-copy {
     align-items: start;
     flex-direction: column;
   }

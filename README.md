@@ -1,6 +1,6 @@
 # Ride Ready
 
-Ride Ready is a local-first web prototype for tracking:
+Ride Ready is a local-first web app prototype for tracking:
 
 - chain waxing intervals
 - wheelset-specific front and rear tyre service life
@@ -10,6 +10,7 @@ Ride Ready is a local-first web prototype for tracking:
 - front and rear brake pads
 - per-bike mileage and service history
 - multiple wheelsets on a single bike
+- Strava-first onboarding flow with import selection stubbed in the frontend
 
 ## What is built
 
@@ -18,6 +19,8 @@ Ride Ready is a local-first web prototype for tracking:
 - Multiple wheelsets per bike, including separate mileage for a 50 mm setup vs a 65 mm setup
 - Quick service logging for wax, chainrings, cassette, front/rear brake pads, front/rear tyres, front/rear sealant, and ride distance
 - Named front/rear tyre and sealant fields on each wheelset so you can see exactly what is installed
+- First-run onboarding that starts with Strava import selection, then falls back to manual setup
+- Edit/delete controls for bikes, wheelsets, and service events
 - Dashboard cards showing due-soon and due-now items
 - Local persistence with `localStorage`
 - JSON export/import for backup

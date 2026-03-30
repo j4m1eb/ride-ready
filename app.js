@@ -553,6 +553,7 @@ function editBike(bikeId) {
   bike.name = name.trim();
   bike.category = category.trim();
   bike.distance = Number(distance) || bike.distance;
+  reconcileBikeMaintenance(bike);
   persist();
   render();
 }
@@ -630,7 +631,7 @@ function currentProgress(item, currentDistance, maintenance, interval) {
       detail: `${formatMonths(months)} since refresh • target ${formatMonths(interval)}`
     };
   }
-  const distance = currentDistance - maintenance.distanceAtService;
+  const distance = Math.max(0, currentDistance - maintenance.distanceAtService);
   return {
     ratio: distance / interval,
     detail: `${formatDistance(distance)} since service • target ${formatDistance(interval)}`
@@ -763,6 +764,8 @@ function normalizeBike(bike) {
     normalized.activeWheelsetId = normalized.wheelsets[0].id;
   }
 
+  reconcileBikeMaintenance(normalized);
+
   return normalized;
 }
 
@@ -784,6 +787,8 @@ function normalizeWheelset(wheelset, fallbackDistance) {
     normalized.thresholds[item.key] = Number(normalized.thresholds[item.key] || item.defaultInterval);
     normalized.maintenance[item.key] = normalizeMaintenance(normalized.maintenance[item.key], normalized.distance);
   });
+
+  reconcileWheelsetMaintenance(normalized);
 
   return normalized;
 }
@@ -919,6 +924,29 @@ function getBike(id) {
 
 function getWheelset(bike, id) {
   return bike.wheelsets.find((wheelset) => wheelset.id === id);
+}
+
+function reconcileBikeMaintenance(bike) {
+  BIKE_CONSUMABLES.forEach((item) => {
+    if (bike.maintenance[item.key].distanceAtService > bike.distance) {
+      bike.maintenance[item.key].distanceAtService = bike.distance;
+    }
+  });
+
+  bike.wheelsets.forEach((wheelset) => {
+    if (wheelset.distance > bike.distance) {
+      wheelset.distance = bike.distance;
+    }
+    reconcileWheelsetMaintenance(wheelset);
+  });
+}
+
+function reconcileWheelsetMaintenance(wheelset) {
+  WHEELSET_CONSUMABLES.forEach((item) => {
+    if (item.mode === "distance" && wheelset.maintenance[item.key].distanceAtService > wheelset.distance) {
+      wheelset.maintenance[item.key].distanceAtService = wheelset.distance;
+    }
+  });
 }
 
 function getServiceWheelset(bike, form) {

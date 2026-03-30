@@ -195,6 +195,73 @@
     </main>
   </div>
 
+  <div class="modal-shell hidden" id="editor-shell">
+    <div class="modal-backdrop" id="editor-backdrop"></div>
+    <section class="modal-card">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow" id="editor-eyebrow">Edit</p>
+          <h2 id="editor-title">Edit item</h2>
+        </div>
+        <button class="ghost-button" id="close-editor" type="button">Close</button>
+      </div>
+
+      <form id="bike-edit-form" class="stack-form hidden">
+        <input name="bikeId" type="hidden">
+        <label>Bike name<input name="name" type="text" required></label>
+        <label>Category
+          <select name="category">
+            <option>Road</option>
+            <option>Gravel</option>
+            <option>MTB</option>
+            <option>CX</option>
+            <option>Trainer</option>
+          </select>
+        </label>
+        <label>Current bike distance<input name="distance" type="number" min="0" step="1" required></label>
+        <label>Chain wax target<input name="waxInterval" type="number" min="1" step="1" required></label>
+        <label>Chain wax install/service date<input name="waxDate" type="date" required></label>
+        <label>Chain wax install mileage<input name="waxMileage" type="number" min="0" step="1" required></label>
+        <label>Chainring target<input name="chainringInterval" type="number" min="1" step="1" required></label>
+        <label>Chainring install date<input name="chainringDate" type="date" required></label>
+        <label>Chainring install mileage<input name="chainringMileage" type="number" min="0" step="1" required></label>
+        <label>Cassette target<input name="cassetteInterval" type="number" min="1" step="1" required></label>
+        <label>Cassette install date<input name="cassetteDate" type="date" required></label>
+        <label>Cassette install mileage<input name="cassetteMileage" type="number" min="0" step="1" required></label>
+        <label>Front brake pad target<input name="frontBrakePadsInterval" type="number" min="1" step="1" required></label>
+        <label>Front brake pad install date<input name="frontBrakePadsDate" type="date" required></label>
+        <label>Front brake pad install mileage<input name="frontBrakePadsMileage" type="number" min="0" step="1" required></label>
+        <label>Rear brake pad target<input name="rearBrakePadsInterval" type="number" min="1" step="1" required></label>
+        <label>Rear brake pad install date<input name="rearBrakePadsDate" type="date" required></label>
+        <label>Rear brake pad install mileage<input name="rearBrakePadsMileage" type="number" min="0" step="1" required></label>
+        <button class="primary-button" type="submit">Save bike changes</button>
+      </form>
+
+      <form id="wheelset-edit-form" class="stack-form hidden">
+        <input name="bikeId" type="hidden">
+        <input name="wheelsetId" type="hidden">
+        <label>Wheelset name<input name="name" type="text" required></label>
+        <label>Notes<input name="notes" type="text"></label>
+        <label>Current wheelset distance<input name="distance" type="number" min="0" step="1" required></label>
+        <label>Front tyre<input name="frontTyreName" type="text"></label>
+        <label>Front tyre target<input name="frontTyreInterval" type="number" min="1" step="1" required></label>
+        <label>Front tyre install date<input name="frontTyreDate" type="date" required></label>
+        <label>Front tyre install mileage<input name="frontTyreMileage" type="number" min="0" step="1" required></label>
+        <label>Rear tyre<input name="rearTyreName" type="text"></label>
+        <label>Rear tyre target<input name="rearTyreInterval" type="number" min="1" step="1" required></label>
+        <label>Rear tyre install date<input name="rearTyreDate" type="date" required></label>
+        <label>Rear tyre install mileage<input name="rearTyreMileage" type="number" min="0" step="1" required></label>
+        <label>Front sealant<input name="frontSealantName" type="text"></label>
+        <label>Front sealant target (months)<input name="frontSealantInterval" type="number" min="1" step="1" required></label>
+        <label>Front sealant refresh date<input name="frontSealantDate" type="date" required></label>
+        <label>Rear sealant<input name="rearSealantName" type="text"></label>
+        <label>Rear sealant target (months)<input name="rearSealantInterval" type="number" min="1" step="1" required></label>
+        <label>Rear sealant refresh date<input name="rearSealantDate" type="date" required></label>
+        <button class="primary-button" type="submit">Save wheelset changes</button>
+      </form>
+    </section>
+  </div>
+
   <template id="bike-card-template">
     <article class="bike-card">
       <div class="bike-card-top">

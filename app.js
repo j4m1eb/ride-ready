@@ -39,6 +39,13 @@ const elements = {
   activityList: document.querySelector("#activity-list"),
   importedBikeList: document.querySelector("#imported-bike-list"),
   importSelectedBikes: document.querySelector("#import-selected-bikes"),
+  editorShell: document.querySelector("#editor-shell"),
+  editorBackdrop: document.querySelector("#editor-backdrop"),
+  closeEditor: document.querySelector("#close-editor"),
+  editorEyebrow: document.querySelector("#editor-eyebrow"),
+  editorTitle: document.querySelector("#editor-title"),
+  bikeEditForm: document.querySelector("#bike-edit-form"),
+  wheelsetEditForm: document.querySelector("#wheelset-edit-form"),
   wheelsetBikeSelect: document.querySelector("#wheelset-bike-select"),
   serviceBikeSelect: document.querySelector("#service-bike-select"),
   serviceTypeSelect: document.querySelector("#service-type-select"),
@@ -186,6 +193,10 @@ function bindEvents() {
   elements.serviceForm.addEventListener("submit", onServiceSubmit);
   elements.serviceBikeSelect.addEventListener("change", renderServiceWheelsetOptions);
   elements.serviceTypeSelect.addEventListener("change", updateServiceWheelsetVisibility);
+  elements.editorBackdrop.addEventListener("click", closeEditor);
+  elements.closeEditor.addEventListener("click", closeEditor);
+  elements.bikeEditForm.addEventListener("submit", onBikeEditSubmit);
+  elements.wheelsetEditForm.addEventListener("submit", onWheelsetEditSubmit);
   elements.connectStrava.addEventListener("click", onConnectStrava);
   elements.importSelectedBikes.addEventListener("click", importSelectedStravaBikes);
   elements.showManualSetup.addEventListener("click", () => {
@@ -544,64 +555,14 @@ function importSelectedStravaBikes() {
 function editBike(bikeId) {
   const bike = getBike(bikeId);
   if (!bike) return;
-  const name = prompt("Bike name", bike.name);
-  if (!name) return;
-  const category = prompt("Category", bike.category);
-  if (!category) return;
-  const distance = prompt("Current bike distance", String(bike.distance));
-  if (distance === null) return;
-  bike.name = name.trim();
-  bike.category = category.trim();
-  bike.distance = Number(distance) || bike.distance;
-
-  BIKE_CONSUMABLES.forEach((item) => {
-    const interval = prompt(`${item.label} target (${state.units})`, String(bike.thresholds[item.key]));
-    if (interval !== null && interval !== "") {
-      bike.thresholds[item.key] = Number(interval) || bike.thresholds[item.key];
-    }
-    const baselineDate = prompt(`${item.label} install/service date (YYYY-MM-DD)`, bike.maintenance[item.key].date);
-    if (baselineDate !== null && baselineDate.trim()) {
-      bike.maintenance[item.key].date = baselineDate.trim();
-    }
-  });
-
-  reconcileBikeMaintenance(bike);
-  persist();
-  render();
+  openBikeEditor(bike);
 }
 
 function editWheelset(bikeId, wheelsetId) {
   const bike = getBike(bikeId);
   const wheelset = bike && getWheelset(bike, wheelsetId);
   if (!wheelset) return;
-  const name = prompt("Wheelset name", wheelset.name);
-  if (!name) return;
-  const notes = prompt("Wheelset notes", wheelset.notes);
-  const frontTyre = prompt("Front tyre", wheelset.components.frontTyre);
-  const rearTyre = prompt("Rear tyre", wheelset.components.rearTyre);
-  const frontSealant = prompt("Front sealant", wheelset.components.frontSealant);
-  const rearSealant = prompt("Rear sealant", wheelset.components.rearSealant);
-  wheelset.name = name.trim();
-  wheelset.notes = notes === null ? wheelset.notes : notes.trim();
-  if (frontTyre !== null) wheelset.components.frontTyre = frontTyre.trim();
-  if (rearTyre !== null) wheelset.components.rearTyre = rearTyre.trim();
-  if (frontSealant !== null) wheelset.components.frontSealant = frontSealant.trim();
-  if (rearSealant !== null) wheelset.components.rearSealant = rearSealant.trim();
-
-  WHEELSET_CONSUMABLES.forEach((item) => {
-    const unitsLabel = item.mode === "time" ? "months" : state.units;
-    const interval = prompt(`${item.label} target (${unitsLabel})`, String(wheelset.thresholds[item.key]));
-    if (interval !== null && interval !== "") {
-      wheelset.thresholds[item.key] = Number(interval) || wheelset.thresholds[item.key];
-    }
-    const baselineDate = prompt(`${item.label} install/refresh date (YYYY-MM-DD)`, wheelset.maintenance[item.key].date);
-    if (baselineDate !== null && baselineDate.trim()) {
-      wheelset.maintenance[item.key].date = baselineDate.trim();
-    }
-  });
-
-  persist();
-  render();
+  openWheelsetEditor(bike, wheelset);
 }
 
 function deleteBike(bikeId) {
@@ -659,7 +620,7 @@ function currentProgress(item, currentDistance, maintenance, interval) {
   const distance = Math.max(0, currentDistance - maintenance.distanceAtService);
   return {
     ratio: distance / interval,
-    detail: `${formatDistance(distance)} since service • target ${formatDistance(interval)} • date ${maintenance.date}`
+    detail: `${formatDistance(distance)} since service • target ${formatDistance(interval)} • installed ${maintenance.date} @ ${formatDistance(maintenance.distanceAtService)}`
   };
 }
 
@@ -949,6 +910,98 @@ function getBike(id) {
 
 function getWheelset(bike, id) {
   return bike.wheelsets.find((wheelset) => wheelset.id === id);
+}
+
+function openBikeEditor(bike) {
+  elements.editorEyebrow.textContent = "Edit bike";
+  elements.editorTitle.textContent = bike.name;
+  elements.bikeEditForm.classList.remove("hidden");
+  elements.wheelsetEditForm.classList.add("hidden");
+  const form = elements.bikeEditForm;
+  form.elements.bikeId.value = bike.id;
+  form.elements.name.value = bike.name;
+  form.elements.category.value = bike.category;
+  form.elements.distance.value = bike.distance;
+  BIKE_CONSUMABLES.forEach((item) => {
+    form.elements[`${item.key}Interval`].value = bike.thresholds[item.key];
+    form.elements[`${item.key}Date`].value = bike.maintenance[item.key].date;
+    form.elements[`${item.key}Mileage`].value = bike.maintenance[item.key].distanceAtService;
+  });
+  elements.editorShell.classList.remove("hidden");
+}
+
+function openWheelsetEditor(bike, wheelset) {
+  elements.editorEyebrow.textContent = "Edit wheelset";
+  elements.editorTitle.textContent = `${bike.name} • ${wheelset.name}`;
+  elements.wheelsetEditForm.classList.remove("hidden");
+  elements.bikeEditForm.classList.add("hidden");
+  const form = elements.wheelsetEditForm;
+  form.elements.bikeId.value = bike.id;
+  form.elements.wheelsetId.value = wheelset.id;
+  form.elements.name.value = wheelset.name;
+  form.elements.notes.value = wheelset.notes;
+  form.elements.distance.value = wheelset.distance;
+  form.elements.frontTyreName.value = wheelset.components.frontTyre;
+  form.elements.rearTyreName.value = wheelset.components.rearTyre;
+  form.elements.frontSealantName.value = wheelset.components.frontSealant;
+  form.elements.rearSealantName.value = wheelset.components.rearSealant;
+  WHEELSET_CONSUMABLES.forEach((item) => {
+    form.elements[`${item.key}Interval`].value = wheelset.thresholds[item.key];
+    form.elements[`${item.key}Date`].value = wheelset.maintenance[item.key].date;
+    if (item.mode === "distance") {
+      form.elements[`${item.key}Mileage`].value = wheelset.maintenance[item.key].distanceAtService;
+    }
+  });
+  elements.editorShell.classList.remove("hidden");
+}
+
+function closeEditor() {
+  elements.editorShell.classList.add("hidden");
+}
+
+function onBikeEditSubmit(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const bike = getBike(form.elements.bikeId.value);
+  if (!bike) return;
+  bike.name = form.elements.name.value.trim();
+  bike.category = form.elements.category.value;
+  bike.distance = Number(form.elements.distance.value) || bike.distance;
+  BIKE_CONSUMABLES.forEach((item) => {
+    bike.thresholds[item.key] = Number(form.elements[`${item.key}Interval`].value) || bike.thresholds[item.key];
+    bike.maintenance[item.key].date = form.elements[`${item.key}Date`].value || bike.maintenance[item.key].date;
+    bike.maintenance[item.key].distanceAtService = Number(form.elements[`${item.key}Mileage`].value);
+  });
+  reconcileBikeMaintenance(bike);
+  persist();
+  closeEditor();
+  render();
+}
+
+function onWheelsetEditSubmit(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const bike = getBike(form.elements.bikeId.value);
+  const wheelset = bike && getWheelset(bike, form.elements.wheelsetId.value);
+  if (!wheelset) return;
+  wheelset.name = form.elements.name.value.trim();
+  wheelset.notes = form.elements.notes.value.trim();
+  wheelset.distance = Number(form.elements.distance.value) || wheelset.distance;
+  wheelset.components.frontTyre = form.elements.frontTyreName.value.trim();
+  wheelset.components.rearTyre = form.elements.rearTyreName.value.trim();
+  wheelset.components.frontSealant = form.elements.frontSealantName.value.trim();
+  wheelset.components.rearSealant = form.elements.rearSealantName.value.trim();
+  WHEELSET_CONSUMABLES.forEach((item) => {
+    wheelset.thresholds[item.key] = Number(form.elements[`${item.key}Interval`].value) || wheelset.thresholds[item.key];
+    wheelset.maintenance[item.key].date = form.elements[`${item.key}Date`].value || wheelset.maintenance[item.key].date;
+    if (item.mode === "distance") {
+      wheelset.maintenance[item.key].distanceAtService = Number(form.elements[`${item.key}Mileage`].value);
+    }
+  });
+  reconcileWheelsetMaintenance(wheelset);
+  persist();
+  closeEditor();
+  render();
 }
 
 function reconcileBikeMaintenance(bike) {

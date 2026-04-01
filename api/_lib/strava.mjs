@@ -47,6 +47,26 @@ function decodeSigned(value, secret) {
   }
 }
 
+export function createOauthState() {
+  const { SESSION_SECRET } = env();
+  return encodeSigned(
+    {
+      nonce: crypto.randomUUID(),
+      iat: Date.now()
+    },
+    SESSION_SECRET
+  );
+}
+
+export function verifyOauthState(value) {
+  const { SESSION_SECRET } = env();
+  const payload = decodeSigned(value, SESSION_SECRET);
+  if (!payload?.iat) return null;
+  const ageMs = Date.now() - Number(payload.iat);
+  if (ageMs < 0 || ageMs > 10 * 60 * 1000) return null;
+  return payload;
+}
+
 function appendSetCookie(res, cookie) {
   const current = res.getHeader("Set-Cookie");
   if (!current) {

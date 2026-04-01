@@ -1,4 +1,4 @@
-import { clearOauthCookie, exchangeCode, readOauth, redirect, setAuthCookie } from "../../_lib/strava.mjs";
+import { clearOauthCookie, exchangeCode, readOauth, redirect, setAuthCookie, verifyOauthState } from "../../_lib/strava.mjs";
 import { upsertAthleteRecord } from "../../_lib/supabase.mjs";
 
 export default async function handler(req, res) {
@@ -8,7 +8,9 @@ export default async function handler(req, res) {
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
     const oauth = readOauth(req);
-    if (!code || !state || !oauth || oauth.state !== state) {
+    const signedState = verifyOauthState(state);
+    const cookieMatches = oauth?.state && oauth.state === state;
+    if (!code || !state || (!signedState && !cookieMatches)) {
       res.statusCode = 400;
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       res.end("<h1>Ride Ready</h1><p>Strava sign-in failed. The callback state did not match.</p>");

@@ -1,5 +1,4 @@
-import crypto from "node:crypto";
-import { env, redirect, setOauthCookie } from "../_lib/strava.mjs";
+import { createOauthState, env, redirect, setOauthCookie } from "../_lib/strava.mjs";
 
 export default async function handler(_req, res) {
   const { STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, BASE_URL } = env();
@@ -10,7 +9,7 @@ export default async function handler(_req, res) {
     return;
   }
 
-  const oauthState = crypto.randomUUID();
+  const oauthState = createOauthState();
   setOauthCookie(res, oauthState);
 
   const redirectUrl = new URL("https://www.strava.com/oauth/authorize");

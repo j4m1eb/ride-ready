@@ -1,5 +1,5 @@
 import { clearOauthCookie, exchangeCode, fetchProfile, mapImportedBikes, readOauth, redirect, setAuthCookie, verifyOauthState } from "../../_lib/strava.mjs";
-import { upsertAthleteRecord } from "../../_lib/supabase.mjs";
+import { getAthleteRecord, upsertAthleteRecord } from "../../_lib/supabase.mjs";
 
 export default async function handler(req, res) {
   try {
@@ -22,6 +22,7 @@ export default async function handler(req, res) {
       access_token: tokenPayload.access_token
     });
     const importedBikes = mapImportedBikes(profile);
+    const existing = await getAthleteRecord(profile.id);
     const now = new Date().toISOString();
     await upsertAthleteRecord({
       athlete_id: profile.id,
@@ -33,9 +34,9 @@ export default async function handler(req, res) {
       expires_at: tokenPayload.expires_at,
       profile_json: profile,
       imported_bikes_json: importedBikes,
-      app_state_json: null,
+      app_state_json: existing?.app_state_json || null,
       last_sync_at: null,
-      created_at: now,
+      created_at: existing?.created_at || now,
       updated_at: now
     });
     setAuthCookie(res, { athlete_id: profile.id });

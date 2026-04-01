@@ -212,11 +212,11 @@ export function bootstrapPayload(auth, profile, importedBikes, state = null) {
   return {
     backend: true,
     stravaConnected: Boolean(auth),
-    athlete: auth?.athlete
+    athlete: profile || auth?.athlete
       ? {
-          id: auth.athlete.id,
-          username: auth.athlete.username,
-          name: [auth.athlete.firstname, auth.athlete.lastname].filter(Boolean).join(" ")
+          id: (profile || auth.athlete).id,
+          username: (profile || auth.athlete).username,
+          name: [(profile || auth.athlete).firstname, (profile || auth.athlete).lastname].filter(Boolean).join(" ")
         }
       : null,
     lastSyncAt: auth?.last_sync_at || null,

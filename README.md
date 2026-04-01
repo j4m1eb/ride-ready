@@ -64,7 +64,7 @@ Then put the client ID and client secret into `.env`.
 
 ## Deploy on Vercel
 
-This repo now includes Vercel serverless routes for live Strava auth and sync:
+This repo now includes Vercel serverless routes for live Strava auth and sync, with shared state stored in Supabase:
 
 - `/api/bootstrap`
 - `/api/state`
@@ -78,14 +78,24 @@ Set these environment variables in Vercel:
 - `STRAVA_CLIENT_ID`
 - `STRAVA_CLIENT_SECRET`
 - `SESSION_SECRET`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+Create the Supabase table first by running:
+
+- [supabase/schema.sql](/Users/jamiebishop/Bike%20Maintenance/supabase/schema.sql)
 
 Then update the Strava app settings to:
 
 - Authorization callback domain: `ride-ready-tracker.vercel.app`
 - Authorization callback URL: `https://ride-ready-tracker.vercel.app/auth/strava/callback`
 
-The live Vercel version currently keeps app state in the browser and uses signed cookies for Strava auth.
-That is enough for a real single-user version today.
+The live Vercel version uses:
+
+- signed auth cookies
+- Supabase for Strava tokens and shared app state
+
+That means your bikes, wheelsets, and service history can stay in sync across devices once you connect Strava on the live site.
 
 ## How sync works now
 
@@ -111,7 +121,6 @@ That last point is the main compromise in this first real version:
 
 Move this from the current local-first real build into one of these directions:
 
-- hosted backend with a proper production database
-- real user accounts instead of cookie-session-only auth
+- real user accounts instead of Strava-cookie-only auth
 - Strava webhook support for automatic background sync
 - privacy policy and terms

@@ -1,8 +1,10 @@
-import { clearOauthCookie, env, exchangeCode, readOauth, redirect, setAuthCookie } from "../../_lib/strava.mjs";
+import { clearOauthCookie, exchangeCode, readOauth, redirect, setAuthCookie } from "../../_lib/strava.mjs";
+import { upsertAthleteRecord } from "../../_lib/supabase.mjs";
 
 export default async function handler(req, res) {
   try {
-    const url = new URL(req.url, env().BASE_URL);
+    const origin = `https://${req.headers.host}`;
+    const url = new URL(req.url, origin);
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
     const oauth = readOauth(req);
@@ -14,13 +16,23 @@ export default async function handler(req, res) {
     }
 
     const tokenPayload = await exchangeCode(code);
-    setAuthCookie(res, {
-      athlete: tokenPayload.athlete,
+    const now = new Date().toISOString();
+    await upsertAthleteRecord({
+      athlete_id: tokenPayload.athlete.id,
+      username: tokenPayload.athlete.username || "",
+      firstname: tokenPayload.athlete.firstname || "",
+      lastname: tokenPayload.athlete.lastname || "",
       access_token: tokenPayload.access_token,
       refresh_token: tokenPayload.refresh_token,
       expires_at: tokenPayload.expires_at,
-      last_sync_at: null
+      profile_json: tokenPayload.athlete,
+      imported_bikes_json: [],
+      app_state_json: null,
+      last_sync_at: null,
+      created_at: now,
+      updated_at: now
     });
+    setAuthCookie(res, { athlete_id: tokenPayload.athlete.id });
     clearOauthCookie(res);
     return redirect(res, "/");
   } catch (error) {

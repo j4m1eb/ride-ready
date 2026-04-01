@@ -1,6 +1,6 @@
 # Ride Ready
 
-Ride Ready is a local-first web app prototype for tracking:
+Ride Ready is a web app for tracking:
 
 - chain waxing intervals
 - wheelset-specific front and rear tyre service life
@@ -10,11 +10,12 @@ Ride Ready is a local-first web app prototype for tracking:
 - front and rear brake pads
 - per-bike mileage and service history
 - multiple wheelsets on a single bike
-- Strava-first onboarding flow with import selection stubbed in the frontend
+- Strava-connected bike import and mileage sync
 
 ## What is built
 
-- Single-page responsive web app
+- Single-page responsive frontend
+- Local Node backend with SQLite persistence
 - Bike profiles with bike-level and wheelset-level thresholds
 - Multiple wheelsets per bike, including separate mileage for a 50 mm setup vs a 65 mm setup
 - Quick service logging for wax, chainrings, cassette, front/rear brake pads, front/rear tyres, front/rear sealant, and ride distance
@@ -22,34 +23,95 @@ Ride Ready is a local-first web app prototype for tracking:
 - First-run onboarding that starts with Strava import selection, then falls back to manual setup
 - Edit/delete controls for bikes, wheelsets, and service events
 - Dashboard cards showing due-soon and due-now items
-- Local persistence with `localStorage`
+- Backend persistence with SQLite when run through `server.mjs`
+- `localStorage` fallback when opened as a purely static page
 - JSON export/import for backup
+- Real Strava OAuth route and token exchange
+- Real Strava athlete/bike import
+- Strava bike-distance sync into tracked bikes using stored `stravaGearId`
 
 ## Run locally
 
-Because this app is static, you can open `index.html` directly in a browser or serve it locally:
+1. Copy the example env file:
 
 ```bash
-python3 -m http.server 4173
+cp .env.example .env
+```
+
+2. Fill in your Strava app values in `.env`:
+
+- `STRAVA_CLIENT_ID`
+- `STRAVA_CLIENT_SECRET`
+- `SESSION_SECRET`
+- `BASE_URL=http://localhost:4173`
+
+3. Start the real app:
+
+```bash
+npm run dev
 ```
 
 Then open `http://localhost:4173`.
 
-## Strava path
+## Strava app setup
 
-This prototype intentionally keeps Strava as a product boundary, not a fake frontend-only integration.
+Create a Strava API application and set:
 
-To add real Strava sync next:
+- Authorization callback domain: `localhost`
+- Authorization callback URL: `http://localhost:4173/auth/strava/callback`
 
-1. Create a Strava app and configure OAuth redirect URIs.
-2. Add a small backend to exchange the authorization code for tokens.
-3. Store athlete identity, tokens, bikes, and synced activities.
-4. Pull activities, use `gear_id` to map rides to bikes, and apply rides to the active or selected wheelset.
-5. Handle missing `gear_id` values and ambiguous wheelset choice with a manual correction flow.
+Then put the client ID and client secret into `.env`.
+
+## Deploy on Vercel
+
+This repo now includes Vercel serverless routes for live Strava auth and sync:
+
+- `/api/bootstrap`
+- `/api/state`
+- `/api/strava/sync`
+- `/auth/strava`
+- `/auth/strava/callback`
+
+Set these environment variables in Vercel:
+
+- `BASE_URL=https://ride-ready-tracker.vercel.app`
+- `STRAVA_CLIENT_ID`
+- `STRAVA_CLIENT_SECRET`
+- `SESSION_SECRET`
+
+Then update the Strava app settings to:
+
+- Authorization callback domain: `ride-ready-tracker.vercel.app`
+- Authorization callback URL: `https://ride-ready-tracker.vercel.app/auth/strava/callback`
+
+The live Vercel version currently keeps app state in the browser and uses signed cookies for Strava auth.
+That is enough for a real single-user version today.
+
+## How sync works now
+
+- Strava OAuth signs you into your own Ride Ready session
+- Strava bikes are fetched from the authenticated athlete profile
+- Imported bikes are stored with a `stravaGearId`
+- On sync, Ride Ready updates the bike distance from Strava
+- Any new synced bike distance is added to the currently active wheelset for that bike
+
+That last point is the main compromise in this first real version:
+
+- Strava can identify the bike
+- Strava cannot identify your current wheelset
+- so Ride Ready applies new synced distance to the active wheelset you have selected
+
+## Important limits
+
+- New Strava apps start with athlete capacity `1` until Strava approves wider use
+- If you want clubmates to use their own Strava accounts, you will need Strava approval
+- If other people use this, you should add a privacy policy and terms page before sharing it publicly
 
 ## Recommended next build step
 
-Move this into one of these directions:
+Move this from the current local-first real build into one of these directions:
 
-- Next.js app with a small API/backend for Strava OAuth and sync
-- Native SwiftUI app plus a backend for Strava token exchange and ride sync
+- hosted backend with a proper production database
+- real user accounts instead of cookie-session-only auth
+- Strava webhook support for automatic background sync
+- privacy policy and terms

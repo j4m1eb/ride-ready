@@ -4,7 +4,6 @@ const LEGACY_STORAGE_KEYS = ["chainkeeper-state-v3", "chainkeeper-state-v2", "ch
 const BIKE_CONSUMABLES = [
   { key: "wax", label: "Chain wax", defaultInterval: 300, mode: "distance" },
   { key: "chainring", label: "Chainrings", defaultInterval: 12000, mode: "distance" },
-  { key: "cassette", label: "Cassette", defaultInterval: 8000, mode: "distance" },
   { key: "frontBrakePads", label: "Front brake pads", defaultInterval: 2500, mode: "distance" },
   { key: "rearBrakePads", label: "Rear brake pads", defaultInterval: 2200, mode: "distance" }
 ];
@@ -12,6 +11,7 @@ const BIKE_CONSUMABLES = [
 const WHEELSET_CONSUMABLES = [
   { key: "frontTyre", label: "Front tyre", defaultInterval: 2500, mode: "distance" },
   { key: "rearTyre", label: "Rear tyre", defaultInterval: 2200, mode: "distance" },
+  { key: "cassette", label: "Cassette", defaultInterval: 8000, mode: "distance" },
   { key: "frontSealant", label: "Front sealant", defaultInterval: 4, mode: "time" },
   { key: "rearSealant", label: "Rear sealant", defaultInterval: 4, mode: "time" }
 ];
@@ -23,12 +23,24 @@ const IMPORTED_STRAVA_BIKES = [
   { key: "strava-mtb", name: "Strava MTB", category: "MTB", distance: 1240 }
 ];
 
+const backend = {
+  enabled: false,
+  athlete: null,
+  lastSyncAt: null,
+  importedBikes: [...IMPORTED_STRAVA_BIKES]
+};
+
+const confirmState = {
+  onAccept: null
+};
+
 const demoState = buildDemoState();
 const state = loadState();
 
 const elements = {
   onboardingSection: document.querySelector("#onboarding-section"),
   manualSetupPanel: document.querySelector("#manual-setup-panel"),
+  setupPanelBody: document.querySelector("#setup-panel-body"),
   bikeForm: document.querySelector("#bike-form"),
   wheelsetForm: document.querySelector("#wheelset-form"),
   serviceForm: document.querySelector("#service-form"),
@@ -40,14 +52,22 @@ const elements = {
   activityList: document.querySelector("#activity-list"),
   importedBikeList: document.querySelector("#imported-bike-list"),
   importSelectedBikes: document.querySelector("#import-selected-bikes"),
-  quickWaxChain: document.querySelector("#quick-wax-chain"),
+  toggleStravaManage: document.querySelector("#toggle-strava-manage"),
   showBikeTab: document.querySelector("#show-bike-tab"),
   showWheelsetTab: document.querySelector("#show-wheelset-tab"),
+  toggleSetupPanel: document.querySelector("#toggle-setup-panel"),
   editorShell: document.querySelector("#editor-shell"),
   editorBackdrop: document.querySelector("#editor-backdrop"),
   closeEditor: document.querySelector("#close-editor"),
   editorEyebrow: document.querySelector("#editor-eyebrow"),
   editorTitle: document.querySelector("#editor-title"),
+  confirmShell: document.querySelector("#confirm-shell"),
+  confirmBackdrop: document.querySelector("#confirm-backdrop"),
+  confirmEyebrow: document.querySelector("#confirm-eyebrow"),
+  confirmTitle: document.querySelector("#confirm-title"),
+  confirmMessage: document.querySelector("#confirm-message"),
+  confirmCancel: document.querySelector("#confirm-cancel"),
+  confirmAccept: document.querySelector("#confirm-accept"),
   bikeEditForm: document.querySelector("#bike-edit-form"),
   wheelsetEditForm: document.querySelector("#wheelset-edit-form"),
   wheelsetBikeSelect: document.querySelector("#wheelset-bike-select"),
@@ -70,9 +90,14 @@ const templates = {
   importedBike: document.querySelector("#imported-bike-template")
 };
 
-normalizeState();
 bindEvents();
-render();
+init();
+
+async function init() {
+  normalizeState();
+  render();
+  await hydrateFromBackend();
+}
 
 function buildDemoState() {
   const road = createBike({
@@ -89,12 +114,12 @@ function buildDemoState() {
       rearSealantName: "Silca Ultimate Tubeless",
       frontTyreInterval: 3400,
       rearTyreInterval: 2800,
+      cassetteInterval: 9500,
       frontSealantInterval: 4,
       rearSealantInterval: 4
     }),
     waxInterval: 450,
     chainringInterval: 14000,
-    cassetteInterval: 9500,
     frontBrakePadsInterval: 2800,
     rearBrakePadsInterval: 2200
   });
@@ -108,16 +133,17 @@ function buildDemoState() {
     rearSealantName: "Stan's Race",
     frontTyreInterval: 3200,
     rearTyreInterval: 2500,
+    cassetteInterval: 9500,
     frontSealantInterval: 3,
     rearSealantInterval: 3
   }));
   road.maintenance.wax = { distanceAtService: 920, date: "2025-03-22" };
   road.maintenance.chainring = { distanceAtService: 0, date: "2024-11-02" };
-  road.maintenance.cassette = { distanceAtService: 140, date: "2024-12-18" };
   road.maintenance.frontBrakePads = { distanceAtService: 180, date: "2025-02-24" };
   road.maintenance.rearBrakePads = { distanceAtService: 620, date: "2025-03-10" };
   road.wheelsets[0].maintenance.frontTyre = { distanceAtService: 0, date: "2025-01-18" };
   road.wheelsets[0].maintenance.rearTyre = { distanceAtService: 220, date: "2025-02-02" };
+  road.wheelsets[0].maintenance.cassette = { distanceAtService: 140, date: "2024-12-18" };
   road.wheelsets[0].maintenance.frontSealant = { distanceAtService: 350, date: "2025-02-10" };
   road.wheelsets[0].maintenance.rearSealant = { distanceAtService: 350, date: "2025-02-10" };
   road.activeWheelsetId = road.wheelsets[0].id;
@@ -136,20 +162,20 @@ function buildDemoState() {
       rearSealantName: "Orange Seal Endurance",
       frontTyreInterval: 2600,
       rearTyreInterval: 2000,
+      cassetteInterval: 7600,
       frontSealantInterval: 3,
       rearSealantInterval: 3
     }),
     waxInterval: 300,
     chainringInterval: 11000,
-    cassetteInterval: 7600,
     frontBrakePadsInterval: 2400,
     rearBrakePadsInterval: 2100
   });
   gravel.maintenance.wax = { distanceAtService: 710, date: "2025-03-26" };
   gravel.maintenance.chainring = { distanceAtService: 0, date: "2024-10-12" };
-  gravel.maintenance.cassette = { distanceAtService: 80, date: "2024-11-16" };
   gravel.wheelsets[0].maintenance.frontTyre = { distanceAtService: 140, date: "2024-12-03" };
   gravel.wheelsets[0].maintenance.rearTyre = { distanceAtService: 240, date: "2025-01-06" };
+  gravel.wheelsets[0].maintenance.cassette = { distanceAtService: 80, date: "2024-11-16" };
   gravel.wheelsets[0].maintenance.frontSealant = { distanceAtService: 0, date: "2025-01-28" };
   gravel.wheelsets[0].maintenance.rearSealant = { distanceAtService: 0, date: "2025-01-28" };
 
@@ -184,11 +210,22 @@ function parseState(raw) {
 }
 
 function defaultOnboarding() {
-  return { stravaConnected: false, showManualSetup: false, importedKeys: [], setupTab: "bike", selectedBikeId: "" };
+  return {
+    stravaConnected: false,
+    showManualSetup: false,
+    importedKeys: [],
+    manageStravaExpanded: false,
+    setupTab: "bike",
+    selectedBikeId: "",
+    setupCollapsed: true
+  };
 }
 
 function persist() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  if (backend.enabled) {
+    saveStateToBackend().catch((error) => console.error("Failed to save Ride Ready state", error));
+  }
 }
 
 function bindEvents() {
@@ -199,17 +236,25 @@ function bindEvents() {
   elements.serviceTypeSelect.addEventListener("change", updateServiceWheelsetVisibility);
   elements.editorBackdrop.addEventListener("click", closeEditor);
   elements.closeEditor.addEventListener("click", closeEditor);
+  elements.confirmBackdrop.addEventListener("click", closeConfirm);
+  elements.confirmCancel.addEventListener("click", closeConfirm);
+  elements.confirmAccept.addEventListener("click", acceptConfirm);
   elements.bikeEditForm.addEventListener("submit", onBikeEditSubmit);
   elements.wheelsetEditForm.addEventListener("submit", onWheelsetEditSubmit);
-  elements.quickWaxChain.addEventListener("click", () => quickServiceAction("wax"));
   elements.showBikeTab.addEventListener("click", () => setSetupTab("bike"));
   elements.showWheelsetTab.addEventListener("click", () => setSetupTab("wheelset"));
+  elements.toggleSetupPanel.addEventListener("click", toggleSetupPanel);
+  elements.toggleStravaManage.addEventListener("click", toggleStravaManage);
   elements.connectStrava.addEventListener("click", onConnectStrava);
   elements.importSelectedBikes.addEventListener("click", importSelectedStravaBikes);
   elements.showManualSetup.addEventListener("click", () => {
     state.onboarding.showManualSetup = true;
+    state.onboarding.setupCollapsed = false;
     persist();
     render();
+    requestAnimationFrame(() => {
+      elements.manualSetupPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   });
   elements.seedDemo.addEventListener("click", seedDemoData);
   elements.exportData.addEventListener("click", exportState);
@@ -225,6 +270,14 @@ function bindEvents() {
 }
 
 function onConnectStrava() {
+  if (backend.enabled) {
+    if (state.onboarding.stravaConnected) {
+      syncWithStrava();
+    } else {
+      window.location.href = "/auth/strava";
+    }
+    return;
+  }
   state.onboarding.stravaConnected = true;
   persist();
   render();
@@ -314,22 +367,48 @@ function renderUnits() {
 
 function renderOnboarding() {
   const hasBikes = state.bikes.length > 0;
-  elements.onboardingSection.classList.toggle("hidden", hasBikes && !state.onboarding.stravaConnected);
+  const compactOnboarding = hasBikes;
+  const showCompactConnectedState = state.onboarding.stravaConnected && hasBikes;
+  const showStravaManager = !showCompactConnectedState || state.onboarding.manageStravaExpanded;
+  elements.onboardingSection.classList.remove("hidden");
+  elements.onboardingSection.classList.toggle("is-compact", compactOnboarding);
+  elements.onboardingSection.classList.toggle("is-managing", showCompactConnectedState && showStravaManager);
   elements.manualSetupPanel.classList.toggle("hidden", !state.onboarding.showManualSetup && !hasBikes);
+  const setupCollapsed = hasBikes ? state.onboarding.setupCollapsed : false;
+  elements.setupPanelBody.classList.toggle("hidden", setupCollapsed);
+  elements.toggleSetupPanel.textContent = setupCollapsed ? "Show setup" : "Hide setup";
   elements.showBikeTab.classList.toggle("is-active", state.onboarding.setupTab !== "wheelset");
   elements.showWheelsetTab.classList.toggle("is-active", state.onboarding.setupTab === "wheelset");
   elements.bikeForm.classList.toggle("hidden", state.onboarding.setupTab === "wheelset");
   elements.wheelsetForm.classList.toggle("hidden", state.onboarding.setupTab !== "wheelset");
   elements.stravaStatus.textContent = state.onboarding.stravaConnected ? "Strava connected (stub)" : "Strava not connected";
+  if (backend.enabled && state.onboarding.stravaConnected) {
+    elements.stravaStatus.textContent = backend.lastSyncAt
+      ? `Strava connected • last sync ${new Date(backend.lastSyncAt).toLocaleString()}`
+      : "Strava connected";
+    elements.connectStrava.textContent = "Sync Strava";
+    elements.showManualSetup.textContent = "Bike setup";
+  } else {
+    elements.connectStrava.textContent = "Connect Strava";
+    elements.showManualSetup.textContent = "Skip Strava for now";
+  }
+  elements.toggleStravaManage.classList.toggle("hidden", !showCompactConnectedState);
+  elements.toggleStravaManage.textContent = state.onboarding.manageStravaExpanded ? "Hide bikes" : "Manage bikes";
   elements.importSelectedBikes.disabled = !state.onboarding.stravaConnected;
 
   elements.importedBikeList.innerHTML = "";
   if (!state.onboarding.stravaConnected) {
     elements.importedBikeList.innerHTML = `<div class="empty-state">Connect Strava to preview imported bikes.</div>`;
+    elements.importedBikeList.classList.remove("hidden");
+    elements.importSelectedBikes.classList.remove("hidden");
     return;
   }
 
-  IMPORTED_STRAVA_BIKES.forEach((item) => {
+  elements.importedBikeList.classList.toggle("hidden", !showStravaManager);
+  elements.importSelectedBikes.classList.toggle("hidden", !showStravaManager);
+
+  const importedSource = backend.importedBikes.length ? backend.importedBikes : IMPORTED_STRAVA_BIKES;
+  importedSource.forEach((item) => {
     const fragment = templates.importedBike.content.cloneNode(true);
     const checkbox = fragment.querySelector(".imported-bike-checkbox");
     checkbox.value = item.key;
@@ -345,10 +424,11 @@ function renderOnboarding() {
 }
 
 function renderStats() {
+  const focusBike = selectedBike();
   const stats = [
     { value: state.bikes.length, caption: "Bikes tracked" },
     { value: wheelsetCount(), caption: "Wheelsets tracked" },
-    { value: totalDistance(), caption: "Bike distance", type: "distance" },
+    { value: focusBike ? focusBike.distance : totalDistance(), caption: focusBike ? `${focusBike.name} distance` : "Bike distance", type: "distance" },
     { value: allDueItems().filter((item) => item.status !== "In range").length, caption: "Items due soon" }
   ];
   elements.statsGrid.innerHTML = "";
@@ -445,13 +525,18 @@ function renderBikes() {
     `;
 
     const activateButton = wheelsetFragment.querySelector(".activate-wheelset");
-    activateButton.textContent = isActive ? "Active" : "Set active";
-    activateButton.disabled = isActive;
-    activateButton.addEventListener("click", () => {
-      bike.activeWheelsetId = wheelset.id;
-      persist();
-      render();
-    });
+    if (isActive) {
+      activateButton.remove();
+    } else {
+      activateButton.classList.remove("ghost-button");
+      activateButton.classList.add("primary-button", "wheelset-action-button");
+      activateButton.textContent = "Set active";
+      activateButton.addEventListener("click", () => {
+        bike.activeWheelsetId = wheelset.id;
+        persist();
+        render();
+      });
+    }
 
     wheelsetFragment.querySelector(".edit-wheelset").addEventListener("click", () => editWheelset(bike.id, wheelset.id));
     wheelsetFragment.querySelector(".delete-wheelset").addEventListener("click", () => deleteWheelset(bike.id, wheelset.id));
@@ -547,7 +632,7 @@ function importSelectedStravaBikes() {
     return;
   }
 
-  const imported = IMPORTED_STRAVA_BIKES
+  const imported = backend.importedBikes
     .filter((item) => state.onboarding.importedKeys.includes(item.key))
     .filter((item) => !state.bikes.some((bike) => bike.name === item.name));
 
@@ -566,19 +651,20 @@ function importSelectedStravaBikes() {
         notes: "Imported from Strava, complete wheel details next",
         distance: item.distance,
         frontTyreName: "",
-        rearTyreName: "",
-        frontSealantName: "",
-        rearSealantName: "",
-        frontTyreInterval: 2500,
-        rearTyreInterval: 2200,
-        frontSealantInterval: 4,
-        rearSealantInterval: 4
-      }),
-      waxInterval: 300,
-      chainringInterval: 12000,
+      rearTyreName: "",
+      frontSealantName: "",
+      rearSealantName: "",
+      frontTyreInterval: 2500,
+      rearTyreInterval: 2200,
       cassetteInterval: 8000,
-      frontBrakePadsInterval: 2500,
-      rearBrakePadsInterval: 2200
+      frontSealantInterval: 4,
+      rearSealantInterval: 4
+    }),
+    waxInterval: 300,
+    chainringInterval: 12000,
+    frontBrakePadsInterval: 2500,
+    rearBrakePadsInterval: 2200,
+    stravaGearId: item.gearId || item.key
     });
     state.bikes.unshift(bike);
     if (index === 0) state.onboarding.selectedBikeId = bike.id;
@@ -586,6 +672,8 @@ function importSelectedStravaBikes() {
   });
 
   state.onboarding.showManualSetup = true;
+  state.onboarding.setupCollapsed = true;
+  state.onboarding.manageStravaExpanded = false;
   persist();
   render();
 }
@@ -604,14 +692,19 @@ function editWheelset(bikeId, wheelsetId) {
 }
 
 function deleteBike(bikeId) {
-  if (!confirm("Delete this bike and all of its wheelsets and service history?")) return;
-  state.bikes = state.bikes.filter((bike) => bike.id !== bikeId);
-  state.activity = state.activity.filter((item) => item.bikeId !== bikeId);
-  if (state.onboarding.selectedBikeId === bikeId) {
-    state.onboarding.selectedBikeId = state.bikes[0]?.id || "";
-  }
-  persist();
-  render();
+  openConfirm({
+    title: "Delete bike?",
+    message: "This deletes the bike, all of its wheelsets, and all related service history.",
+    onAccept: () => {
+      state.bikes = state.bikes.filter((bike) => bike.id !== bikeId);
+      state.activity = state.activity.filter((item) => item.bikeId !== bikeId);
+      if (state.onboarding.selectedBikeId === bikeId) {
+        state.onboarding.selectedBikeId = state.bikes[0]?.id || "";
+      }
+      persist();
+      render();
+    }
+  });
 }
 
 function deleteWheelset(bikeId, wheelsetId) {
@@ -620,19 +713,29 @@ function deleteWheelset(bikeId, wheelsetId) {
     alert("A bike needs at least one wheelset.");
     return;
   }
-  if (!confirm("Delete this wheelset?")) return;
-  bike.wheelsets = bike.wheelsets.filter((wheelset) => wheelset.id !== wheelsetId);
-  if (bike.activeWheelsetId === wheelsetId) bike.activeWheelsetId = bike.wheelsets[0].id;
-  state.activity = state.activity.filter((item) => item.wheelsetId !== wheelsetId);
-  persist();
-  render();
+  openConfirm({
+    title: "Delete wheelset?",
+    message: "This removes the wheelset and any service history attached to it.",
+    onAccept: () => {
+      bike.wheelsets = bike.wheelsets.filter((wheelset) => wheelset.id !== wheelsetId);
+      if (bike.activeWheelsetId === wheelsetId) bike.activeWheelsetId = bike.wheelsets[0].id;
+      state.activity = state.activity.filter((item) => item.wheelsetId !== wheelsetId);
+      persist();
+      render();
+    }
+  });
 }
 
 function deleteActivity(activityId) {
-  if (!confirm("Delete this service event?")) return;
-  state.activity = state.activity.filter((item) => item.id !== activityId);
-  persist();
-  render();
+  openConfirm({
+    title: "Delete service event?",
+    message: "This removes the log entry from your service history.",
+    onAccept: () => {
+      state.activity = state.activity.filter((item) => item.id !== activityId);
+      persist();
+      render();
+    }
+  });
 }
 
 function createMeter(item, currentDistance, maintenance, interval) {
@@ -750,6 +853,7 @@ function seedDemoData() {
   state.bikes = structuredClone(demoState.bikes);
   state.activity = structuredClone(demoState.activity);
   state.onboarding.selectedBikeId = state.bikes[0]?.id || "";
+  state.onboarding.setupCollapsed = true;
   persist();
   render();
 }
@@ -758,6 +862,9 @@ function normalizeState() {
   state.units = state.units === "mi" ? "mi" : "km";
   state.onboarding = { ...defaultOnboarding(), ...(state.onboarding || {}) };
   state.bikes = (state.bikes || []).map((bike) => normalizeBike(bike));
+  if (state.bikes.length && typeof state.onboarding.setupCollapsed !== "boolean") {
+    state.onboarding.setupCollapsed = true;
+  }
   if (!state.onboarding.selectedBikeId || !state.bikes.some((bike) => bike.id === state.onboarding.selectedBikeId)) {
     state.onboarding.selectedBikeId = state.bikes[0]?.id || "";
   }
@@ -833,17 +940,20 @@ function migrateBikeThresholds(bike) {
 
 function migrateWheelsetFields(wheelset, fallbackDistance) {
   const legacyTyreInterval = Number(wheelset.thresholds.tyre || WHEELSET_CONSUMABLES[0].defaultInterval);
-  const legacySealantInterval = Number(wheelset.thresholds.sealant || WHEELSET_CONSUMABLES[2].defaultInterval);
+  const legacyCassetteInterval = Number(wheelset.thresholds.cassette || WHEELSET_CONSUMABLES[2].defaultInterval);
+  const legacySealantInterval = Number(wheelset.thresholds.sealant || WHEELSET_CONSUMABLES[3].defaultInterval);
   wheelset.components.frontTyre = wheelset.components.frontTyre || "";
   wheelset.components.rearTyre = wheelset.components.rearTyre || "";
   wheelset.components.frontSealant = wheelset.components.frontSealant || "";
   wheelset.components.rearSealant = wheelset.components.rearSealant || "";
   if (!wheelset.thresholds.frontTyre) wheelset.thresholds.frontTyre = legacyTyreInterval;
   if (!wheelset.thresholds.rearTyre) wheelset.thresholds.rearTyre = legacyTyreInterval;
+  if (!wheelset.thresholds.cassette) wheelset.thresholds.cassette = legacyCassetteInterval;
   if (!wheelset.thresholds.frontSealant) wheelset.thresholds.frontSealant = legacySealantInterval;
   if (!wheelset.thresholds.rearSealant) wheelset.thresholds.rearSealant = legacySealantInterval;
   if (!wheelset.maintenance.frontTyre) wheelset.maintenance.frontTyre = wheelset.maintenance.tyre || normalizeMaintenance(null, wheelset.distance ?? fallbackDistance);
   if (!wheelset.maintenance.rearTyre) wheelset.maintenance.rearTyre = wheelset.maintenance.tyre || normalizeMaintenance(null, wheelset.distance ?? fallbackDistance);
+  if (!wheelset.maintenance.cassette) wheelset.maintenance.cassette = normalizeMaintenance(null, wheelset.distance ?? fallbackDistance);
   if (!wheelset.maintenance.frontSealant) wheelset.maintenance.frontSealant = wheelset.maintenance.sealant || normalizeMaintenance(null, wheelset.distance ?? fallbackDistance);
   if (!wheelset.maintenance.rearSealant) wheelset.maintenance.rearSealant = wheelset.maintenance.sealant || normalizeMaintenance(null, wheelset.distance ?? fallbackDistance);
 }
@@ -856,7 +966,6 @@ function createBikeFromForm(form) {
     wheelset: createWheelsetFromForm(form, true),
     waxInterval: Number(form.get("waxInterval")),
     chainringInterval: Number(form.get("chainringInterval")),
-    cassetteInterval: Number(form.get("cassetteInterval")),
     frontBrakePadsInterval: Number(form.get("frontBrakePadsInterval")),
     rearBrakePadsInterval: Number(form.get("rearBrakePadsInterval"))
   });
@@ -873,22 +982,23 @@ function createWheelsetFromForm(form, bikeForm = false) {
     rearSealantName: form.get("rearSealantName").toString().trim(),
     frontTyreInterval: Number(form.get("frontTyreInterval")),
     rearTyreInterval: Number(form.get("rearTyreInterval")),
+    cassetteInterval: Number(form.get("cassetteInterval")),
     frontSealantInterval: Number(form.get("frontSealantInterval")),
     rearSealantInterval: Number(form.get("rearSealantInterval"))
   });
 }
 
-function createBike({ name, category, distance, wheelset, waxInterval, chainringInterval, cassetteInterval, frontBrakePadsInterval, rearBrakePadsInterval }) {
+function createBike({ name, category, distance, wheelset, waxInterval, chainringInterval, frontBrakePadsInterval, rearBrakePadsInterval, stravaGearId = "" }) {
   const bike = {
     id: crypto.randomUUID(),
     name,
     category,
     distance,
+    stravaGearId,
     activeWheelsetId: wheelset.id,
     thresholds: {
       wax: waxInterval,
       chainring: chainringInterval,
-      cassette: cassetteInterval,
       frontBrakePads: frontBrakePadsInterval,
       rearBrakePads: rearBrakePadsInterval
     },
@@ -901,7 +1011,7 @@ function createBike({ name, category, distance, wheelset, waxInterval, chainring
   return bike;
 }
 
-function createWheelset({ name, notes, distance, frontTyreName, rearTyreName, frontSealantName, rearSealantName, frontTyreInterval, rearTyreInterval, frontSealantInterval, rearSealantInterval }) {
+function createWheelset({ name, notes, distance, frontTyreName, rearTyreName, frontSealantName, rearSealantName, frontTyreInterval, rearTyreInterval, cassetteInterval, frontSealantInterval, rearSealantInterval }) {
   const wheelset = {
     id: crypto.randomUUID(),
     name,
@@ -916,6 +1026,7 @@ function createWheelset({ name, notes, distance, frontTyreName, rearTyreName, fr
     thresholds: {
       frontTyre: frontTyreInterval,
       rearTyre: rearTyreInterval,
+      cassette: cassetteInterval,
       frontSealant: frontSealantInterval,
       rearSealant: rearSealantInterval
     },
@@ -933,8 +1044,8 @@ function createWheelsetFromLegacyBike(bike) {
     name: "Default wheelset",
     notes: "Migrated from bike-level tyre and sealant tracking",
     distance: bike.distance,
-    thresholds: { tyre: bike.thresholds.tyre, sealant: bike.thresholds.sealant },
-    maintenance: { tyre: bike.maintenance.tyre, sealant: bike.maintenance.sealant },
+    thresholds: { tyre: bike.thresholds.tyre, sealant: bike.thresholds.sealant, cassette: bike.thresholds.cassette },
+    maintenance: { tyre: bike.maintenance.tyre, sealant: bike.maintenance.sealant, cassette: bike.maintenance.cassette },
     components: {}
   }, bike.distance);
 }
@@ -977,6 +1088,7 @@ function renderBikeTabs() {
   }
 
   elements.bikeTabs.classList.remove("hidden");
+  elements.bikeTabs.classList.add("segmented-control");
   state.bikes.forEach((bike) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -994,6 +1106,19 @@ function renderBikeTabs() {
 
 function setSetupTab(tab) {
   state.onboarding.setupTab = tab;
+  state.onboarding.setupCollapsed = false;
+  persist();
+  render();
+}
+
+function toggleSetupPanel() {
+  state.onboarding.setupCollapsed = !state.onboarding.setupCollapsed;
+  persist();
+  render();
+}
+
+function toggleStravaManage() {
+  state.onboarding.manageStravaExpanded = !state.onboarding.manageStravaExpanded;
   persist();
   render();
 }
@@ -1043,6 +1168,24 @@ function openWheelsetEditor(bike, wheelset) {
 
 function closeEditor() {
   elements.editorShell.classList.add("hidden");
+}
+
+function openConfirm({ title, message, onAccept }) {
+  confirmState.onAccept = onAccept;
+  elements.confirmTitle.textContent = title;
+  elements.confirmMessage.textContent = message;
+  elements.confirmShell.classList.remove("hidden");
+}
+
+function closeConfirm() {
+  confirmState.onAccept = null;
+  elements.confirmShell.classList.add("hidden");
+}
+
+function acceptConfirm() {
+  const action = confirmState.onAccept;
+  closeConfirm();
+  action?.();
 }
 
 function onBikeEditSubmit(event) {
@@ -1146,7 +1289,8 @@ function activityLabel(type) {
     frontTyre: "Front tyre replaced",
     rearTyre: "Rear tyre replaced",
     frontSealant: "Front sealant refreshed",
-    rearSealant: "Rear sealant refreshed"
+    rearSealant: "Rear sealant refreshed",
+    syncRide: "Strava sync"
   };
   return labels[type] || "Updated";
 }
@@ -1170,6 +1314,65 @@ function quickServiceAction(type) {
 
   persist();
   render();
+}
+
+async function hydrateFromBackend() {
+  try {
+    const response = await fetch("/api/bootstrap", { headers: { Accept: "application/json" } });
+    if (!response.ok) return;
+    const payload = await response.json();
+    backend.enabled = Boolean(payload.backend);
+    backend.athlete = payload.athlete || null;
+    backend.lastSyncAt = payload.lastSyncAt || null;
+    backend.importedBikes = payload.importedBikes?.length ? payload.importedBikes : [...IMPORTED_STRAVA_BIKES];
+    if (payload.state) {
+      state.units = payload.state.units || state.units;
+      state.onboarding = payload.state.onboarding || defaultOnboarding();
+      state.bikes = payload.state.bikes || [];
+      state.activity = payload.state.activity || [];
+    }
+    state.onboarding.stravaConnected = Boolean(payload.stravaConnected);
+    normalizeState();
+    render();
+  } catch (error) {
+    console.error("Failed to load backend state", error);
+  }
+}
+
+async function saveStateToBackend() {
+  await fetch("/api/state", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ state })
+  });
+}
+
+async function syncWithStrava() {
+  try {
+    const response = await fetch("/api/strava/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ state })
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(payload.error || "Strava sync failed");
+    }
+    const payload = await response.json();
+    backend.lastSyncAt = payload.lastSyncAt || null;
+    backend.importedBikes = payload.importedBikes?.length ? payload.importedBikes : backend.importedBikes;
+    if (payload.state) {
+      state.units = payload.state.units || state.units;
+      state.onboarding = payload.state.onboarding || state.onboarding;
+      state.bikes = payload.state.bikes || state.bikes;
+      state.activity = payload.state.activity || state.activity;
+      state.onboarding.stravaConnected = true;
+      normalizeState();
+      render();
+    }
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
 function toggleValue(list, value, enabled) {

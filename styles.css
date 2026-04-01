@@ -1,14 +1,15 @@
 :root {
-  --bg: #f5f3ef;
-  --panel: rgba(255, 255, 255, 0.9);
-  --panel-strong: #ffffff;
+  --bg: #1b1e22;
+  --panel: #f3f0ea;
+  --panel-muted: #ece7df;
+  --card: #ffffff;
   --panel-ink: #181512;
   --text: #181512;
   --muted: #6a6258;
-  --line: rgba(24, 21, 18, 0.08);
-  --line-strong: rgba(24, 21, 18, 0.14);
-  --accent: #d7661f;
-  --accent-deep: #b75217;
+  --line: rgba(24, 21, 18, 0.09);
+  --line-strong: rgba(24, 21, 18, 0.16);
+  --accent: #f27a1a;
+  --accent-deep: #d9620d;
   --teal: #1b5d62;
   --ok: #248158;
   --warn: #b07400;
@@ -30,8 +31,8 @@ body {
   font-family: "DM Sans", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(215, 102, 31, 0.08), transparent 24%),
-    linear-gradient(180deg, #f8f6f2 0%, #f2eee8 100%);
+    radial-gradient(circle at top left, rgba(242, 122, 26, 0.12), transparent 24%),
+    linear-gradient(180deg, #22262b 0%, var(--bg) 100%);
 }
 
 button,
@@ -77,6 +78,14 @@ textarea:focus-visible {
   gap: 6px;
 }
 
+.topbar .eyebrow {
+  color: var(--accent);
+}
+
+.topbar h1 {
+  color: #ffffff;
+}
+
 .topbar-actions,
 .hero-actions,
 .panel-header,
@@ -87,7 +96,7 @@ textarea:focus-visible {
 .quick-button-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
 }
 
@@ -98,10 +107,14 @@ textarea:focus-visible {
   flex-wrap: wrap;
 }
 
+.panel-header {
+  margin-bottom: 16px;
+}
+
 .panel,
 .strava-card {
   border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.58);
+  border: 1px solid var(--line);
   box-shadow: var(--shadow);
   backdrop-filter: blur(16px);
 }
@@ -112,21 +125,94 @@ textarea:focus-visible {
 }
 
 .utility-panel {
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--panel);
 }
 
 .dashboard-panel {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--panel);
 }
 
 .garage-panel {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--panel);
 }
 
 .hero-panel {
   grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.88fr);
   margin-bottom: 22px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--panel);
+}
+
+.hero-panel.is-compact {
+  grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.88fr);
+  align-items: start;
+  gap: 18px;
+  padding: 18px;
+}
+
+.hero-panel.is-compact .onboarding-copy {
+  gap: 8px;
+  padding: 0;
+}
+
+.hero-panel.is-compact .hero-text {
+  max-width: 52ch;
+  font-size: 0.94rem;
+  line-height: 1.45;
+  margin-bottom: 4px;
+}
+
+.hero-panel.is-compact h2 {
+  font-size: clamp(1.32rem, 1.7vw, 1.8rem);
+  line-height: 1.02;
+}
+
+.hero-panel.is-compact .hero-actions {
+  gap: 10px;
+}
+
+.hero-panel.is-compact .primary-button,
+.hero-panel.is-compact .ghost-button,
+.hero-panel.is-compact .strava-button {
+  min-height: 42px;
+  padding: 10px 16px;
+}
+
+.hero-panel.is-compact .strava-card {
+  padding: 20px;
+}
+
+.hero-panel.is-compact .strava-head {
+  margin-bottom: 12px;
+}
+
+.hero-panel.is-compact .strava-card h3 {
+  font-size: 1.28rem;
+}
+
+.hero-panel.is-compact .strava-card .inline-note {
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.hero-panel.is-compact .imported-bike-list {
+  max-height: 204px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.hero-panel.is-compact.is-managing .imported-bike-list {
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
+  margin-top: 12px;
+}
+
+.hero-panel.is-compact .imported-bike {
+  padding: 12px 14px;
+}
+
+.hero-panel.is-compact .strava-button {
+  margin-top: 14px;
 }
 
 .onboarding-copy {
@@ -139,8 +225,8 @@ textarea:focus-visible {
 .eyebrow,
 .subsection-title {
   margin: 0;
-  color: var(--teal);
-  font-size: 0.76rem;
+  color: var(--accent);
+  font-size: 0.86rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -205,7 +291,8 @@ label,
 .ghost-button,
 .strava-button,
 .segment,
-.danger-link {
+.danger-link,
+.danger-button {
   border: 0;
   border-radius: 999px;
   cursor: pointer;
@@ -214,7 +301,8 @@ label,
 
 .primary-button,
 .ghost-button,
-.strava-button {
+.strava-button,
+.danger-button {
   min-height: 48px;
   padding: 12px 18px;
 }
@@ -223,31 +311,45 @@ label,
 .ghost-button:hover,
 .strava-button:hover,
 .segment:hover,
-.danger-link:hover {
+.danger-link:hover,
+.danger-button:hover {
   transform: translateY(-1px);
 }
 
 .primary-button {
   color: white;
-  background: var(--panel-ink);
-  box-shadow: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  box-shadow: 0 10px 22px rgba(191, 82, 16, 0.18);
 }
 
 .ghost-button {
   color: var(--panel-ink);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--panel-muted);
   border: 1px solid var(--line);
 }
 
 .ghost-button:hover {
   border-color: var(--line-strong);
-  background: rgba(255, 255, 255, 0.96);
+  background: #f1ece4;
+}
+
+.ghost-button.is-active {
+  color: white;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  border-color: transparent;
+  box-shadow: 0 8px 18px rgba(191, 82, 16, 0.16);
 }
 
 .danger-link {
   padding: 0;
   background: transparent;
   color: var(--bad);
+}
+
+.danger-button {
+  color: #ffffff;
+  background: linear-gradient(135deg, #d6336c, #ee5a8c);
+  box-shadow: 0 10px 22px rgba(214, 51, 108, 0.18);
 }
 
 .file-button {
@@ -333,6 +435,7 @@ label,
   margin-top: 18px;
   color: white;
   background: linear-gradient(135deg, #ff6b00, #ff8f1f);
+  box-shadow: 0 10px 22px rgba(255, 107, 0, 0.2);
 }
 
 .layout {
@@ -347,8 +450,7 @@ label,
 }
 
 .service-panel {
-  position: sticky;
-  top: 16px;
+  position: static;
 }
 
 .segmented-control {
@@ -357,8 +459,8 @@ label,
   gap: 4px;
   padding: 4px;
   border-radius: 999px;
-  background: rgba(28, 23, 19, 0.06);
-  border: 1px solid rgba(28, 23, 19, 0.06);
+  background: var(--panel-muted);
+  border: 1px solid var(--line);
 }
 
 .segment {
@@ -369,15 +471,9 @@ label,
 }
 
 .segment.is-active {
-  color: var(--panel-ink);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 10px rgba(57, 40, 24, 0.08);
-}
-
-.topbar .segment.is-active {
   color: white;
-  background: var(--panel-ink);
-  box-shadow: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  box-shadow: 0 8px 18px rgba(191, 82, 16, 0.16);
 }
 
 .stats-grid {
@@ -405,7 +501,7 @@ label,
 .wheelset-card,
 .meter-card,
 .priority-item {
-  background: var(--panel-strong);
+  background: var(--card);
 }
 
 .stat-card {
@@ -414,7 +510,6 @@ label,
   min-height: 128px;
   padding: 18px;
   align-content: start;
-  background: #fff;
 }
 
 .stat-card strong {
@@ -452,40 +547,37 @@ label,
 
 .priority-card {
   padding: 18px;
-  background: #fff;
 }
 
 .priority-item {
   display: grid;
   gap: 6px;
   padding: 16px;
-  background: #fff;
+  background: #fcfbf9;
 }
 
 .priority-item.is-due-now {
-  background: linear-gradient(135deg, rgba(199, 54, 108, 0.16), rgba(255, 236, 243, 0.9));
-  border-color: rgba(199, 54, 108, 0.2);
+  background: #fff4ee;
+  border-color: rgba(215, 102, 31, 0.24);
 }
 
 .priority-item.is-due-soon {
-  background: linear-gradient(135deg, rgba(242, 176, 30, 0.16), rgba(255, 248, 220, 0.94));
-  border-color: rgba(182, 118, 0, 0.18);
+  background: #f7f3ec;
+  border-color: rgba(176, 116, 0, 0.18);
 }
 
 .garage-tabs {
   grid-template-columns: repeat(auto-fit, minmax(132px, max-content));
   margin-bottom: 4px;
+  justify-content: start;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--panel-muted);
+  border: 1px solid var(--line);
 }
 
 .garage-tabs .segment {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(28, 23, 19, 0.08);
-}
-
-.garage-tabs .segment.is-active {
-  color: white;
-  background: var(--panel-ink);
-  border-color: transparent;
+  border: 0;
 }
 
 .bike-card,
@@ -496,7 +588,7 @@ label,
 }
 
 .bike-card {
-  background: #fff;
+  background: var(--card);
 }
 
 .bike-name {
@@ -508,9 +600,13 @@ label,
 }
 
 .wheelset-card {
-  background: transparent;
-  border: 1px solid var(--line);
+  background: #f8f5f0;
+  border: 1px solid rgba(24, 21, 18, 0.06);
   padding: 18px;
+}
+
+.wheelset-top {
+  align-items: start;
 }
 
 .wheelset-block {
@@ -535,7 +631,7 @@ label,
   min-height: 28px;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(28, 23, 19, 0.06);
+  background: var(--panel-muted);
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 700;
@@ -543,13 +639,14 @@ label,
 }
 
 .status-badge.is-active {
-  background: rgba(24, 21, 18, 0.08);
-  color: var(--panel-ink);
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color: #ffffff;
 }
 
 .wheelset-specs {
   display: grid;
-  gap: 6px;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   padding: 0;
   border-radius: 0;
   background: transparent;
@@ -559,6 +656,11 @@ label,
 .priority-item p,
 .activity-item p {
   margin: 0;
+}
+
+.wheelset-action-button {
+  min-height: 40px;
+  padding: 8px 14px;
 }
 
 .spec-row {
@@ -613,7 +715,7 @@ label,
   margin: 0;
   padding: 7px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--panel-muted);
   font-size: 0.92rem;
   font-weight: 700;
   white-space: nowrap;
@@ -635,13 +737,29 @@ label,
 
 .quick-button-row {
   justify-content: flex-start;
-  margin-bottom: 8px;
+  margin-top: 6px;
+  margin-bottom: 14px;
 }
 
 .quick-action-button {
   min-height: 40px;
   padding: 8px 14px;
   font-size: 0.94rem;
+}
+
+.panel-toggle-button {
+  min-height: 38px;
+  padding: 7px 12px;
+  font-size: 0.9rem;
+}
+
+.utility-panel h2 {
+  font-size: clamp(1.7rem, 2vw, 2.45rem);
+}
+
+.utility-panel .segmented-control {
+  margin-top: 4px;
+  margin-bottom: 16px;
 }
 
 .stack-form {
@@ -676,7 +794,7 @@ label,
   padding: 13px 15px;
   border-radius: 18px;
   border: 1px solid rgba(28, 23, 19, 0.1);
-  background: #fff;
+  background: var(--card);
   color: var(--panel-ink);
   box-shadow: none;
 }
@@ -697,13 +815,13 @@ label,
 .empty-state {
   padding: 18px;
   border-radius: 20px;
-  background: rgba(255, 251, 246, 0.66);
+  background: #f7f3ec;
   border: 1px dashed rgba(28, 23, 19, 0.12);
 }
 
 .activity-item {
   padding: 18px;
-  background: #fff;
+  background: var(--card);
 }
 
 .activity-title {
@@ -750,9 +868,31 @@ label,
   overflow: auto;
   padding: 22px;
   border-radius: 28px;
-  background: var(--panel-strong);
+  background: var(--card);
   border: 1px solid rgba(23, 20, 17, 0.08);
   box-shadow: var(--shadow);
+}
+
+.confirm-card {
+  width: min(520px, 100%);
+  display: grid;
+  gap: 22px;
+}
+
+.confirm-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.confirm-copy .hero-text {
+  max-width: 36ch;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 1220px) {
@@ -761,9 +901,10 @@ label,
     grid-template-columns: 1fr;
   }
 
-  .service-panel {
-    position: static;
+  .hero-panel.is-compact {
+    grid-template-columns: 1fr;
   }
+
 }
 
 @media (max-width: 900px) {
@@ -789,15 +930,60 @@ label,
     border-radius: 24px;
   }
 
+  .hero-panel.is-compact {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .hero-panel.is-compact .strava-card {
+    width: 100%;
+  }
+
   .topbar,
   .stats-grid,
   .priority-grid {
     grid-template-columns: 1fr;
   }
 
+  .topbar {
+    gap: 14px;
+  }
+
+  .topbar-actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .topbar-actions .segmented-control {
+    flex: 0 0 auto;
+  }
+
+  .topbar-actions .ghost-button,
+  .topbar-actions .file-button {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+
+  .hero-actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .hero-actions .primary-button,
+  .hero-actions .ghost-button {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+
+  .wheelset-specs {
+    grid-template-columns: 1fr;
+  }
+
   .panel-header,
-  .topbar-actions,
-  .hero-actions,
   .bike-card-top,
   .wheelset-top,
   .meter-copy {
@@ -808,6 +994,15 @@ label,
   .inline-actions {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .confirm-actions {
+    justify-content: stretch;
+  }
+
+  .confirm-actions .ghost-button,
+  .confirm-actions .danger-button {
+    flex: 1 1 160px;
   }
 
   .stat-card {

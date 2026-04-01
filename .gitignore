@@ -11,3 +11,7 @@ Thumbs.db
 
 # Python
 __pycache__/
+
+# App runtime
+.env
+data/

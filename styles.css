@@ -898,20 +898,23 @@ label,
 
 .site-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 18px;
   margin-top: 18px;
-  padding: 0 4px;
+  padding: 14px 18px 6px;
 }
 
 .site-footer a {
-  color: rgba(255, 255, 255, 0.76);
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
-  font-size: 0.94rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .site-footer a:hover {
   color: #ffffff;
+  text-decoration: underline;
 }
 
 .legal-shell {
@@ -1063,7 +1066,7 @@ label,
   }
 
   .site-footer {
-    justify-content: flex-start;
+    justify-content: center;
     padding-bottom: 12px;
   }
 

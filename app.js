@@ -381,7 +381,7 @@ function renderOnboarding() {
   elements.showWheelsetTab.classList.toggle("is-active", state.onboarding.setupTab === "wheelset");
   elements.bikeForm.classList.toggle("hidden", state.onboarding.setupTab === "wheelset");
   elements.wheelsetForm.classList.toggle("hidden", state.onboarding.setupTab !== "wheelset");
-  elements.stravaStatus.textContent = state.onboarding.stravaConnected ? "Strava connected (stub)" : "Strava not connected";
+  elements.stravaStatus.textContent = state.onboarding.stravaConnected ? "Strava connected" : "Strava not connected";
   if (backend.enabled && state.onboarding.stravaConnected) {
     elements.stravaStatus.textContent = backend.lastSyncAt
       ? `Strava connected • last sync ${new Date(backend.lastSyncAt).toLocaleString()}`
@@ -499,6 +499,12 @@ function renderBikes() {
   const fragment = templates.bikeCard.content.cloneNode(true);
   fragment.querySelector(".bike-name").textContent = bike.name;
   fragment.querySelector(".bike-meta").textContent = `${bike.category} • ${formatDistance(bike.distance)} total • ${bike.wheelsets.length} wheelset${bike.wheelsets.length === 1 ? "" : "s"}`;
+  const moveBikeButton = fragment.querySelector(".move-bike-first");
+  if (state.bikes[0]?.id === bike.id) {
+    moveBikeButton.remove();
+  } else {
+    moveBikeButton.addEventListener("click", () => moveBikeFirst(bike.id));
+  }
   fragment.querySelector(".delete-bike").addEventListener("click", () => deleteBike(bike.id));
   fragment.querySelector(".edit-bike").addEventListener("click", () => editBike(bike.id));
 
@@ -668,7 +674,7 @@ function importSelectedStravaBikes() {
     });
     state.bikes.unshift(bike);
     if (index === 0) state.onboarding.selectedBikeId = bike.id;
-    state.activity.unshift(activityRecord(bike, bike.wheelsets[0], "setup", bike.distance, "Imported from Strava stub"));
+    state.activity.unshift(activityRecord(bike, bike.wheelsets[0], "setup", bike.distance, "Imported from Strava"));
   });
 
   state.onboarding.showManualSetup = true;
@@ -682,6 +688,16 @@ function editBike(bikeId) {
   const bike = getBike(bikeId);
   if (!bike) return;
   openBikeEditor(bike);
+}
+
+function moveBikeFirst(bikeId) {
+  const index = state.bikes.findIndex((bike) => bike.id === bikeId);
+  if (index <= 0) return;
+  const [bike] = state.bikes.splice(index, 1);
+  state.bikes.unshift(bike);
+  state.onboarding.selectedBikeId = bike.id;
+  persist();
+  render();
 }
 
 function editWheelset(bikeId, wheelsetId) {

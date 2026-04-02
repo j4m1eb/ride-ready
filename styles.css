@@ -413,6 +413,14 @@ label,
   color: rgba(255, 255, 255, 0.72);
 }
 
+.strava-powered-mark {
+  display: block;
+  height: 20px;
+  width: auto;
+  margin: 2px 0 10px;
+  opacity: 0.88;
+}
+
 .status-dot {
   width: 10px;
   height: 10px;

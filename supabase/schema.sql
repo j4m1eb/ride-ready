@@ -16,3 +16,7 @@ create table if not exists public.ride_ready_athletes (
 
 create index if not exists ride_ready_athletes_updated_at_idx
   on public.ride_ready_athletes (updated_at desc);
+
+alter table public.ride_ready_athletes enable row level security;
+
+revoke all on table public.ride_ready_athletes from anon, authenticated;

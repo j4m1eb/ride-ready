@@ -30,6 +30,8 @@ const backend = {
   importedBikes: [...IMPORTED_STRAVA_BIKES]
 };
 
+const AUTO_SYNC_MAX_AGE_MS = 30 * 60 * 1000;
+
 const confirmState = {
   onAccept: null
 };
@@ -1354,6 +1356,9 @@ async function hydrateFromBackend() {
     state.onboarding.stravaConnected = Boolean(payload.stravaConnected);
     normalizeState();
     render();
+    if (shouldAutoSyncOnOpen()) {
+      await syncWithStrava({ silent: true });
+    }
   } catch (error) {
     console.error("Failed to load backend state", error);
   }
@@ -1367,7 +1372,15 @@ async function saveStateToBackend() {
   });
 }
 
-async function syncWithStrava() {
+function shouldAutoSyncOnOpen() {
+  if (!backend.enabled || !state.onboarding.stravaConnected) return false;
+  if (!backend.lastSyncAt) return true;
+  const parsed = Date.parse(backend.lastSyncAt);
+  if (Number.isNaN(parsed)) return true;
+  return Date.now() - parsed > AUTO_SYNC_MAX_AGE_MS;
+}
+
+async function syncWithStrava(options = {}) {
   try {
     const response = await fetch("/api/strava/sync", {
       method: "POST",
@@ -1391,7 +1404,11 @@ async function syncWithStrava() {
       render();
     }
   } catch (error) {
-    alert(error.message);
+    if (!options.silent) {
+      alert(error.message);
+    } else {
+      console.error("Automatic Strava sync failed", error);
+    }
   }
 }
 
